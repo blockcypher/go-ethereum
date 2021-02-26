@@ -17,6 +17,8 @@
 package vm
 
 import (
+	"math/big"
+
 	"github.com/blockcypher/go-ethereum/common"
 	"github.com/blockcypher/go-ethereum/core/types"
 	"github.com/blockcypher/go-ethereum/params"
@@ -818,6 +820,14 @@ func opSuicide(pc *uint64, interpreter *EVMInterpreter, callContext *callCtx) ([
 	beneficiary := callContext.stack.pop()
 	balance := interpreter.evm.StateDB.GetBalance(callContext.contract.Address())
 	interpreter.evm.StateDB.AddBalance(beneficiary.Bytes20(), balance)
+	if interpreter.evm.listener != nil {
+		dstAddr := common.BigToAddress(beneficiary.ToBig())
+		interpreter.evm.listener.RegisterSuicide(
+			interpreter.evm.StateDB.GetNonce(callContext.contract.Address()),
+			interpreter.evm.GasPrice, callContext.contract.Gas,
+			callContext.contract.Address(), dstAddr, big.NewInt(0).Set(balance),
+			uint64(interpreter.evm.depth))
+	}
 	interpreter.evm.StateDB.Suicide(callContext.contract.Address())
 	return nil, nil
 }
