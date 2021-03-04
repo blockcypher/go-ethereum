@@ -87,7 +87,7 @@ func (eth *Ethereum) stateAtBlock(block *types.Block, reexec uint64) (statedb *s
 		if block = eth.blockchain.GetBlockByNumber(block.NumberU64() + 1); block == nil {
 			return nil, nil, fmt.Errorf("block #%d not found", block.NumberU64()+1)
 		}
-		_, _, _, err := eth.blockchain.Processor().Process(block, statedb, vm.Config{})
+		_, _, _, _, _, err := eth.blockchain.Processor().Process(block, statedb, vm.Config{})
 		if err != nil {
 			return nil, nil, fmt.Errorf("processing block %d failed: %v", block.NumberU64(), err)
 		}
@@ -151,7 +151,7 @@ func (eth *Ethereum) statesInRange(fromBlock, toBlock *types.Block, reexec uint6
 		if block == nil {
 			return nil, nil, fmt.Errorf("block #%d not found", i)
 		}
-		_, _, _, err := eth.blockchain.Processor().Process(block, statedb, vm.Config{})
+		_, _, _, _, _, err := eth.blockchain.Processor().Process(block, statedb, vm.Config{})
 		if err != nil {
 			return nil, nil, fmt.Errorf("processing block %d failed: %v", block.NumberU64(), err)
 		}
