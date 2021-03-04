@@ -21,8 +21,8 @@ import (
 	"fmt"
 
 	"github.com/blockcypher/go-ethereum/common"
-	"github.com/blockcypher/go-ethereum/core"
 	"github.com/blockcypher/go-ethereum/core/state"
+	"github.com/blockcypher/go-ethereum/eth/protocols/eth"
 	"github.com/blockcypher/go-ethereum/light"
 	"github.com/blockcypher/go-ethereum/log"
 	"github.com/blockcypher/go-ethereum/p2p"
@@ -58,7 +58,7 @@ type Handler func(peer *Peer) error
 // callback methods to invoke on remote deliveries.
 type Backend interface {
 	// Chain retrieves the blockchain object to serve data.
-	Chain() *core.BlockChain
+	Chain() eth.HandlerBlockchain
 
 	// RunPeer is invoked when a peer joins on the `eth` protocol. The handler
 	// should do any peer maintenance work, handshakes and validations. If all
@@ -485,6 +485,6 @@ func handleMessage(backend Backend, peer *Peer) error {
 type NodeInfo struct{}
 
 // nodeInfo retrieves some `snap` protocol metadata about the running host node.
-func nodeInfo(chain *core.BlockChain) *NodeInfo {
+func nodeInfo(chain eth.HandlerBlockchain) *NodeInfo {
 	return &NodeInfo{}
 }

@@ -77,7 +77,7 @@ type txPool interface {
 // node network handler.
 type handlerConfig struct {
 	Database   ethdb.Database            // Database for direct sync insertions
-	Chain      *core.BlockChain          // Blockchain to serve data from
+	Chain      eth.HandlerBlockchain     // Blockchain to serve data from
 	TxPool     txPool                    // Transaction pool to propagate from
 	Network    uint64                    // Network identifier to adfvertise
 	Sync       downloader.SyncMode       // Whether to fast or full sync
@@ -85,6 +85,20 @@ type handlerConfig struct {
 	EventMux   *event.TypeMux            // Legacy event mux, deprecate for `feed`
 	Checkpoint *params.TrustedCheckpoint // Hard coded checkpoint for sync challenges
 	Whitelist  map[uint64]common.Hash    // Hard coded whitelist for sync challenged
+}
+
+type Handler handler
+
+func (h *Handler) BroadcastTransactions(txs types.Transactions) {
+	h.BroadcastTransactions(txs)
+}
+
+func (h *Handler) PeerCount() int {
+	return h.peers.len()
+}
+
+func (h *Handler) Start() {
+	h.Start()
 }
 
 type handler struct {
@@ -100,7 +114,7 @@ type handler struct {
 
 	database ethdb.Database
 	txpool   txPool
-	chain    *core.BlockChain
+	chain    eth.HandlerBlockchain
 	maxPeers int
 
 	downloader   *downloader.Downloader
@@ -123,6 +137,10 @@ type handler struct {
 	chainSync *chainSyncer
 	wg        sync.WaitGroup
 	peerWG    sync.WaitGroup
+}
+
+func NewHandler(config *handlerConfig) (*handler, error) {
+	return newHandler(config)
 }
 
 // newHandler returns a handler for all Ethereum chain management protocol.
