@@ -7,9 +7,9 @@ import (
 )
 
 type InternalTransaction struct {
-	*Transaction
+	Transaction Transaction
 
-	Sender     *common.Address
+	Sender     common.Address
 	ParentHash common.Hash
 	Depth      uint64
 	Index      uint64
@@ -26,11 +26,11 @@ func NewInternalTransaction(accountNonce uint64, price *big.Int,
 
 	tx := NewTransaction(accountNonce, recipient, amount, gasLimit, price, payload)
 	var h common.Hash
-	return &InternalTransaction{tx, &sender, h, depth, index, note, false}
+	return &InternalTransaction{*tx, sender, h, depth, index, note, false}
 }
 
-func (self *InternalTransaction) Reject() {
-	self.Rejected = true
+func (tx *InternalTransaction) Reject() {
+	tx.Rejected = true
 }
 
 func (tx *InternalTransaction) Hash() common.Hash {
@@ -40,14 +40,14 @@ func (tx *InternalTransaction) Hash() common.Hash {
 	}
 
 	data := []interface{}{
-		tx.Nonce(),
+		tx.Transaction.Nonce(),
 		tx.ParentHash,
-		*tx.Sender,
-		*tx.To(),
-		tx.Value(),
-		tx.GasPrice(),
-		tx.Gas(),
-		tx.Data(),
+		tx.Sender,
+		*tx.Transaction.To(),
+		tx.Transaction.Value(),
+		tx.Transaction.GasPrice(),
+		tx.Transaction.Gas(),
+		tx.Transaction.Data(),
 		tx.Note,
 		tx.Depth,
 		tx.Index,
