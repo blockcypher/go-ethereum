@@ -97,6 +97,19 @@ type Ethereum struct {
 	lock sync.RWMutex // Protects the variadic fields (e.g. gas price and etherbase)
 }
 
+func NewMin(handler *handler, ethDialCandidates enode.Iterator, snapDialCandidates enode.Iterator, networkID uint64) *Ethereum {
+	conf := ethconfig.Defaults
+	conf.SnapshotCache = 0
+	ethereum := Ethereum{
+		config:             &conf,
+		handler:            handler,
+		ethDialCandidates:  ethDialCandidates,
+		snapDialCandidates: snapDialCandidates,
+		networkID:          networkID,
+	}
+	return &ethereum
+}
+
 // New creates a new Ethereum object (including the
 // initialisation of the common Ethereum object)
 func New(stack *node.Node, config *ethconfig.Config) (*Ethereum, error) {
