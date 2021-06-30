@@ -50,7 +50,7 @@ var (
 // in the `eth` protocol without actually doing any data processing.
 type testBackend struct {
 	db     ethdb.Database
-	chain  *core.BlockChain
+	chain  HandlerBlockchain
 	txpool *core.TxPool
 }
 
@@ -91,7 +91,7 @@ func (b *testBackend) close() {
 	b.chain.Stop()
 }
 
-func (b *testBackend) Chain() *core.BlockChain     { return b.chain }
+func (b *testBackend) Chain() HandlerBlockchain    { return b.chain }
 func (b *testBackend) StateBloom() *trie.SyncBloom { return nil }
 func (b *testBackend) TxPool() TxPool              { return b.txpool }
 
