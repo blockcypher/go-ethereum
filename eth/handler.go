@@ -81,7 +81,7 @@ type HandlerConfig handlerConfig
 // node network handler.
 type handlerConfig struct {
 	Database   ethdb.Database            // Database for direct sync insertions
-	Chain      *core.BlockChain          // Blockchain to serve data from
+	Chain      eth.HandlerBlockchain     // Blockchain to serve data from
 	TxPool     txPool                    // Transaction pool to propagate from
 	Merger     *consensus.Merger         // The manager for eth1/2 transition
 	Network    uint64                    // Network identifier to adfvertise
@@ -90,6 +90,20 @@ type handlerConfig struct {
 	EventMux   *event.TypeMux            // Legacy event mux, deprecate for `feed`
 	Checkpoint *params.TrustedCheckpoint // Hard coded checkpoint for sync challenges
 	Whitelist  map[uint64]common.Hash    // Hard coded whitelist for sync challenged
+}
+
+type Handler handler
+
+func (h *Handler) BroadcastTransactions(txs types.Transactions) {
+	(*handler)(h).BroadcastTransactions(txs)
+}
+
+func (h *Handler) PeerCount() int {
+	return h.peers.len()
+}
+
+func (h *Handler) Start(maxPeers int) {
+	(*handler)(h).Start(maxPeers)
 }
 
 type handler struct {
@@ -104,7 +118,7 @@ type handler struct {
 
 	database ethdb.Database
 	txpool   txPool
-	chain    *core.BlockChain
+	chain    eth.HandlerBlockchain
 	maxPeers int
 
 	downloader   *downloader.Downloader

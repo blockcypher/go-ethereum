@@ -21,7 +21,6 @@ import (
 	"fmt"
 
 	"github.com/blockcypher/go-ethereum/common"
-	"github.com/blockcypher/go-ethereum/core"
 	"github.com/blockcypher/go-ethereum/core/types"
 	"github.com/blockcypher/go-ethereum/log"
 	"github.com/blockcypher/go-ethereum/rlp"
@@ -41,7 +40,7 @@ func handleGetBlockHeaders66(backend Backend, msg Decoder, peer *Peer) error {
 
 // ServiceGetBlockHeadersQuery assembles the response to a header query. It is
 // exposed to allow external packages to test protocol behavior.
-func ServiceGetBlockHeadersQuery(chain *core.BlockChain, query *GetBlockHeadersPacket, peer *Peer) []*types.Header {
+func ServiceGetBlockHeadersQuery(chain HandlerBlockchain, query *GetBlockHeadersPacket, peer *Peer) []*types.Header {
 	hashMode := query.Origin.Hash != (common.Hash{})
 	first := true
 	maxNonCanonical := uint64(100)
@@ -139,7 +138,7 @@ func handleGetBlockBodies66(backend Backend, msg Decoder, peer *Peer) error {
 
 // ServiceGetBlockBodiesQuery assembles the response to a body query. It is
 // exposed to allow external packages to test protocol behavior.
-func ServiceGetBlockBodiesQuery(chain *core.BlockChain, query GetBlockBodiesPacket) []rlp.RawValue {
+func ServiceGetBlockBodiesQuery(chain HandlerBlockchain, query GetBlockBodiesPacket) []rlp.RawValue {
 	// Gather blocks until the fetch or network limits is reached
 	var (
 		bytes  int
@@ -170,7 +169,7 @@ func handleGetNodeData66(backend Backend, msg Decoder, peer *Peer) error {
 
 // ServiceGetNodeDataQuery assembles the response to a node data query. It is
 // exposed to allow external packages to test protocol behavior.
-func ServiceGetNodeDataQuery(chain *core.BlockChain, bloom *trie.SyncBloom, query GetNodeDataPacket) [][]byte {
+func ServiceGetNodeDataQuery(chain HandlerBlockchain, bloom *trie.SyncBloom, query GetNodeDataPacket) [][]byte {
 	// Gather state data until the fetch or network limits is reached
 	var (
 		bytes int
@@ -211,7 +210,7 @@ func handleGetReceipts66(backend Backend, msg Decoder, peer *Peer) error {
 
 // ServiceGetReceiptsQuery assembles the response to a receipt query. It is
 // exposed to allow external packages to test protocol behavior.
-func ServiceGetReceiptsQuery(chain *core.BlockChain, query GetReceiptsPacket) []rlp.RawValue {
+func ServiceGetReceiptsQuery(chain HandlerBlockchain, query GetReceiptsPacket) []rlp.RawValue {
 	// Gather state data until the fetch or network limits is reached
 	var (
 		bytes    int
