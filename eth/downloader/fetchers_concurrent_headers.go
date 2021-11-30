@@ -19,8 +19,8 @@ package downloader
 import (
 	"time"
 
-	"github.com/ethereum/go-ethereum/eth/protocols/eth"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/blockcypher/go-ethereum/eth/protocols/eth"
+	"github.com/blockcypher/go-ethereum/log"
 )
 
 // headerQueue implements typedQueue and is a type adapter between the generic
