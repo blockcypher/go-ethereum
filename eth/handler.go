@@ -74,6 +74,8 @@ type txPool interface {
 	SubscribeNewTxsEvent(chan<- core.NewTxsEvent) event.Subscription
 }
 
+type HandlerConfig handlerConfig
+
 // handlerConfig is the collection of initialization parameters to create a full
 // node network handler.
 type handlerConfig struct {
@@ -123,6 +125,11 @@ type handler struct {
 	chainSync *chainSyncer
 	wg        sync.WaitGroup
 	peerWG    sync.WaitGroup
+}
+
+func NewHandler(config *HandlerConfig) (*handler, error) {
+	conf := handlerConfig(*config)
+	return newHandler(&conf)
 }
 
 // newHandler returns a handler for all Ethereum chain management protocol.
