@@ -22,7 +22,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/core/asm"
+	"github.com/blockcypher/go-ethereum/core/asm"
 	"gopkg.in/urfave/cli.v1"
 )
 

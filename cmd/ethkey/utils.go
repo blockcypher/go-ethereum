@@ -22,7 +22,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/cmd/utils"
+	"github.com/blockcypher/go-ethereum/cmd/utils"
 	"gopkg.in/urfave/cli.v1"
 )
 
