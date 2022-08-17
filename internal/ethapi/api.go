@@ -24,7 +24,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/blockcypher/go-ethereum/accounts"
 	"github.com/blockcypher/go-ethereum/accounts/abi"
 	"github.com/blockcypher/go-ethereum/accounts/keystore"
@@ -45,6 +44,7 @@ import (
 	"github.com/blockcypher/go-ethereum/params"
 	"github.com/blockcypher/go-ethereum/rlp"
 	"github.com/blockcypher/go-ethereum/rpc"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/tyler-smith/go-bip39"
 )
 
@@ -730,10 +730,10 @@ func (s *BlockChainAPI) GetHeaderByHash(ctx context.Context, hash common.Hash) m
 }
 
 // GetBlockByNumber returns the requested canonical block.
-// * When blockNr is -1 the chain head is returned.
-// * When blockNr is -2 the pending chain head is returned.
-// * When fullTx is true all transactions in the block are returned, otherwise
-//   only the transaction hash is returned.
+//   - When blockNr is -1 the chain head is returned.
+//   - When blockNr is -2 the pending chain head is returned.
+//   - When fullTx is true all transactions in the block are returned, otherwise
+//     only the transaction hash is returned.
 func (s *BlockChainAPI) GetBlockByNumber(ctx context.Context, number rpc.BlockNumber, fullTx bool) (map[string]interface{}, error) {
 	block, err := s.b.BlockByNumber(ctx, number)
 	if block != nil && err == nil {
@@ -1930,7 +1930,7 @@ func (api *DebugAPI) GetRawReceipts(ctx context.Context, blockNrOrHash rpc.Block
 	}
 	result := make([]hexutil.Bytes, len(receipts))
 	for i, receipt := range receipts {
-		b, err := receipt.MarshalBinary()
+		b, err := rlp.EncodeToBytes(receipt)
 		if err != nil {
 			return nil, err
 		}
