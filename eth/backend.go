@@ -101,6 +101,19 @@ type Ethereum struct {
 	shutdownTracker *shutdowncheck.ShutdownTracker // Tracks if and when the node has shutdown ungracefully
 }
 
+func NewMin(handler *handler, ethDialCandidates enode.Iterator, snapDialCandidates enode.Iterator, networkID uint64) *Ethereum {
+	conf := ethconfig.Defaults
+	conf.SnapshotCache = 0
+	ethereum := Ethereum{
+		config:             &conf,
+		handler:            handler,
+		ethDialCandidates:  ethDialCandidates,
+		snapDialCandidates: snapDialCandidates,
+		networkID:          networkID,
+	}
+	return &ethereum
+}
+
 // New creates a new Ethereum object (including the
 // initialisation of the common Ethereum object)
 func New(stack *node.Node, config *ethconfig.Config) (*Ethereum, error) {
