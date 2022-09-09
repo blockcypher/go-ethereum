@@ -18,15 +18,18 @@ package eth
 
 import (
 	"fmt"
+	"io"
 	"math/big"
 	"time"
 
 	"github.com/blockcypher/go-ethereum/common"
 	"github.com/blockcypher/go-ethereum/consensus"
 	"github.com/blockcypher/go-ethereum/core"
+	"github.com/blockcypher/go-ethereum/core/rawdb"
 	"github.com/blockcypher/go-ethereum/core/state"
 	"github.com/blockcypher/go-ethereum/core/state/snapshot"
 	"github.com/blockcypher/go-ethereum/core/types"
+	"github.com/blockcypher/go-ethereum/core/vm"
 	"github.com/blockcypher/go-ethereum/event"
 	"github.com/blockcypher/go-ethereum/metrics"
 	"github.com/blockcypher/go-ethereum/p2p"
@@ -113,6 +116,39 @@ type HandlerBlockchain interface {
 	GetCanonicalHash(number uint64) common.Hash
 	StateAt(root common.Hash) (*state.StateDB, error)
 	Stop()
+
+	// required for eth/api_backend.go
+	CurrentFinalizedBlock() *types.Block
+	CurrentSafeBlock() *types.Block
+	GetVMConfig() *vm.Config
+	SubscribeChainEvent(ch chan<- core.ChainEvent) event.Subscription
+	SubscribeRemovedLogsEvent(ch chan<- core.RemovedLogsEvent) event.Subscription
+	SubscribeLogsEvent(ch chan<- []*types.Log) event.Subscription
+	SubscribeChainSideEvent(ch chan<- core.ChainSideEvent) event.Subscription
+
+	// required for eth/backend.go
+	Export(w io.Writer) error
+	ExportN(w io.Writer, first uint64, last uint64) error
+	ResetWithGenesisBlock(genesis *types.Block) error
+
+	// required for eth/api.go
+	SetFinalized(block *types.Block)
+	SetSafe(block *types.Block)
+	SetCanonical(head *types.Block) (common.Hash, error)
+
+	// required by eth/state_accesor.go
+	Processor() core.Processor
+
+	// required by eth/catalyst/api.go
+	HasBlockAndState(hash common.Hash, number uint64) bool
+
+	// required by miner/worker.go
+	WriteBlockAndSetHead(block *types.Block, receipts []*types.Receipt, logs []*types.Log, state *state.StateDB, emitHeadEvent bool) (status core.WriteStatus, err error)
+	GetBlocksFromHash(hash common.Hash, n int) (blocks []*types.Block)
+
+	// required by les
+	SubscribeBlockProcessingEvent(ch chan<- bool) event.Subscription
+	GetTransactionLookup(hash common.Hash) *rawdb.LegacyTxLookupEntry
 }
 
 // Handler is a callback to invoke from an outside runner after the boilerplate

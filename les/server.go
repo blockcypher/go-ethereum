@@ -23,6 +23,7 @@ import (
 	"github.com/blockcypher/go-ethereum/common/mclock"
 	"github.com/blockcypher/go-ethereum/core"
 	"github.com/blockcypher/go-ethereum/eth/ethconfig"
+	"github.com/blockcypher/go-ethereum/eth/protocols/eth"
 	"github.com/blockcypher/go-ethereum/ethdb"
 	"github.com/blockcypher/go-ethereum/les/flowcontrol"
 	vfs "github.com/blockcypher/go-ethereum/les/vflux/server"
@@ -45,7 +46,7 @@ const defaultConnectedBias = time.Minute * 3
 
 type ethBackend interface {
 	ArchiveMode() bool
-	BlockChain() *core.BlockChain
+	BlockChain() eth.HandlerBlockchain
 	BloomIndexer() *core.ChainIndexer
 	ChainDb() ethdb.Database
 	Synced() bool

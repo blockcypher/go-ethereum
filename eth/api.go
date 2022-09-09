@@ -30,10 +30,10 @@ import (
 
 	"github.com/blockcypher/go-ethereum/common"
 	"github.com/blockcypher/go-ethereum/common/hexutil"
-	"github.com/blockcypher/go-ethereum/core"
 	"github.com/blockcypher/go-ethereum/core/rawdb"
 	"github.com/blockcypher/go-ethereum/core/state"
 	"github.com/blockcypher/go-ethereum/core/types"
+	"github.com/blockcypher/go-ethereum/eth/protocols/eth"
 	"github.com/blockcypher/go-ethereum/internal/ethapi"
 	"github.com/blockcypher/go-ethereum/log"
 	"github.com/blockcypher/go-ethereum/rlp"
@@ -184,7 +184,7 @@ func (api *AdminAPI) ExportChain(file string, first *uint64, last *uint64) (bool
 	return true, nil
 }
 
-func hasAllBlocks(chain *core.BlockChain, bs []*types.Block) bool {
+func hasAllBlocks(chain eth.HandlerBlockchain, bs []*types.Block) bool {
 	for _, b := range bs {
 		if !chain.HasBlock(b.Hash(), b.NumberU64()) {
 			return false
