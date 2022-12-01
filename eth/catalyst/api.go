@@ -142,14 +142,21 @@ func NewConsensusAPI(eth *eth.Ethereum) *ConsensusAPI {
 
 // ForkchoiceUpdatedV1 has several responsibilities:
 // If the method is called with an empty head block:
-// 		we return success, which can be used to check if the engine API is enabled
+//
+//	we return success, which can be used to check if the engine API is enabled
+//
 // If the total difficulty was not reached:
-// 		we return INVALID
+//
+//	we return INVALID
+//
 // If the finalizedBlockHash is set:
-// 		we check if we have the finalizedBlockHash in our db, if not we start a sync
+//
+//	we check if we have the finalizedBlockHash in our db, if not we start a sync
+//
 // We try to set our blockchain to the headBlock
 // If there are payloadAttributes:
-// 		we try to assemble a block with the payloadAttributes and return its payloadID
+//
+//	we try to assemble a block with the payloadAttributes and return its payloadID
 func (api *ConsensusAPI) ForkchoiceUpdatedV1(update beacon.ForkchoiceStateV1, payloadAttributes *beacon.PayloadAttributesV1) (beacon.ForkChoiceResponse, error) {
 	api.forkchoiceLock.Lock()
 	defer api.forkchoiceLock.Unlock()
@@ -400,10 +407,16 @@ func (api *ConsensusAPI) NewPayloadV1(params beacon.ExecutableDataV1) (beacon.Pa
 		log.Warn("State not available, ignoring new payload")
 		return beacon.PayloadStatusV1{Status: beacon.ACCEPTED}, nil
 	}
+
 	log.Trace("Inserting block without sethead", "hash", block.Hash(), "number", block.Number)
 	if err := api.eth.BlockChain().InsertBlockWithoutSetHead(block); err != nil {
 		log.Warn("NewPayloadV1: inserting block failed", "error", err)
-
+		if err.Error() == "Not locked" {
+			// we are stil working on the previous block
+			// we want to retry later
+			time.Sleep(5 * time.Second)
+			return api.NewPayloadV1(params)
+		}
 		api.invalidLock.Lock()
 		api.invalidBlocksHits[block.Hash()] = 1
 		api.invalidTipsets[block.Hash()] = block.Header()
