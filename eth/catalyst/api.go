@@ -411,6 +411,13 @@ func (api *ConsensusAPI) NewPayloadV1(params beacon.ExecutableDataV1) (beacon.Pa
 	if err := api.eth.BlockChain().InsertBlockWithoutSetHead(block); err != nil {
 		log.Warn("NewPayloadV1: inserting block failed", "error", err)
 
+		if err.Error() == "Not locked" {
+			// we are stil working on the previous block
+			// we want to retry later
+			time.Sleep(5 * time.Second)
+			return api.NewPayloadV1(params)
+		}
+
 		api.invalidLock.Lock()
 		api.invalidBlocksHits[block.Hash()] = 1
 		api.invalidTipsets[block.Hash()] = block.Header()
