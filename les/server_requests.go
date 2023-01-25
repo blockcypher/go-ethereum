@@ -24,6 +24,7 @@ import (
 	"github.com/blockcypher/go-ethereum/core"
 	"github.com/blockcypher/go-ethereum/core/state"
 	"github.com/blockcypher/go-ethereum/core/types"
+	"github.com/blockcypher/go-ethereum/eth/protocols/eth"
 	"github.com/blockcypher/go-ethereum/light"
 	"github.com/blockcypher/go-ethereum/log"
 	"github.com/blockcypher/go-ethereum/metrics"
@@ -35,7 +36,7 @@ import (
 type serverBackend interface {
 	ArchiveMode() bool
 	AddTxsSync() bool
-	BlockChain() *core.BlockChain
+	BlockChain() eth.HandlerBlockchain
 	TxPool() *core.TxPool
 	GetHelperTrie(typ uint, index uint64) *trie.Trie
 }

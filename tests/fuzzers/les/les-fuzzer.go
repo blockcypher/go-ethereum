@@ -29,6 +29,7 @@ import (
 	"github.com/blockcypher/go-ethereum/core/types"
 	"github.com/blockcypher/go-ethereum/core/vm"
 	"github.com/blockcypher/go-ethereum/crypto"
+	"github.com/blockcypher/go-ethereum/eth/protocols/eth"
 	l "github.com/blockcypher/go-ethereum/les"
 	"github.com/blockcypher/go-ethereum/params"
 	"github.com/blockcypher/go-ethereum/rlp"
@@ -112,7 +113,7 @@ func init() {
 }
 
 type fuzzer struct {
-	chain *core.BlockChain
+	chain eth.HandlerBlockchain
 	pool  *core.TxPool
 
 	chainLen  int
@@ -227,7 +228,7 @@ func (f *fuzzer) randomTxHash() common.Hash {
 	return common.BytesToHash(f.read(common.HashLength))
 }
 
-func (f *fuzzer) BlockChain() *core.BlockChain {
+func (f *fuzzer) BlockChain() eth.HandlerBlockchain {
 	return f.chain
 }
 
