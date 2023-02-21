@@ -24,7 +24,7 @@ func NewInternalTransaction(accountNonce uint64, price *big.Int,
 	recipient common.Address, amount *big.Int, payload []byte,
 	depth, index uint64, note string) *InternalTransaction {
 
-	tx := NewTransaction(accountNonce, recipient, amount, gasLimit, price, payload)
+	tx := NewTransaction(accountNonce, recipient, amount, gasLimit, price, []byte{})
 	var h common.Hash
 	return &InternalTransaction{*tx, sender, h, depth, index, note, false}
 }
