@@ -24,7 +24,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/blockcypher/go-ethereum/common"
 	"github.com/blockcypher/go-ethereum/consensus"
 	"github.com/blockcypher/go-ethereum/consensus/misc"
@@ -35,6 +34,7 @@ import (
 	"github.com/blockcypher/go-ethereum/log"
 	"github.com/blockcypher/go-ethereum/params"
 	"github.com/blockcypher/go-ethereum/trie"
+	mapset "github.com/deckarep/golang-set/v2"
 )
 
 const (
@@ -865,7 +865,7 @@ func (w *worker) commitTransaction(env *environment, tx *types.Transaction) ([]*
 		snap = env.state.Snapshot()
 		gp   = env.gasPool.Gas()
 	)
-	receipt, err := core.ApplyTransaction(w.chainConfig, w.chain, &env.coinbase, env.gasPool, env.state, env.header, tx, &env.header.GasUsed, *w.chain.GetVMConfig())
+	receipt, _, _, err := core.ApplyTransaction(w.chainConfig, w.chain, &env.coinbase, env.gasPool, env.state, env.header, tx, &env.header.GasUsed, *w.chain.GetVMConfig())
 	if err != nil {
 		env.state.RevertToSnapshot(snap)
 		env.gasPool.SetGas(gp)
