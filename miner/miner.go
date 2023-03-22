@@ -26,11 +26,11 @@ import (
 	"github.com/blockcypher/go-ethereum/common"
 	"github.com/blockcypher/go-ethereum/common/hexutil"
 	"github.com/blockcypher/go-ethereum/consensus"
-	"github.com/blockcypher/go-ethereum/core"
 	"github.com/blockcypher/go-ethereum/core/state"
 	"github.com/blockcypher/go-ethereum/core/txpool"
 	"github.com/blockcypher/go-ethereum/core/types"
 	"github.com/blockcypher/go-ethereum/eth/downloader"
+	"github.com/blockcypher/go-ethereum/eth/protocols/eth"
 	"github.com/blockcypher/go-ethereum/event"
 	"github.com/blockcypher/go-ethereum/log"
 	"github.com/blockcypher/go-ethereum/params"
@@ -39,7 +39,7 @@ import (
 // Backend wraps all methods required for mining. Only full node is capable
 // to offer all the functions here.
 type Backend interface {
-	BlockChain() *core.BlockChain
+	BlockChain() eth.HandlerBlockchain
 	TxPool() *txpool.TxPool
 }
 

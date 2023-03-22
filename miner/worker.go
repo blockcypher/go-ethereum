@@ -30,6 +30,7 @@ import (
 	"github.com/blockcypher/go-ethereum/core"
 	"github.com/blockcypher/go-ethereum/core/state"
 	"github.com/blockcypher/go-ethereum/core/types"
+	"github.com/blockcypher/go-ethereum/eth/protocols/eth"
 	"github.com/blockcypher/go-ethereum/event"
 	"github.com/blockcypher/go-ethereum/log"
 	"github.com/blockcypher/go-ethereum/params"
@@ -195,7 +196,7 @@ type worker struct {
 	chainConfig *params.ChainConfig
 	engine      consensus.Engine
 	eth         Backend
-	chain       *core.BlockChain
+	chain       eth.HandlerBlockchain
 
 	// Feeds
 	pendingLogsFeed event.Feed
