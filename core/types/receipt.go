@@ -127,27 +127,11 @@ func (r *Receipt) EncodeRLP(w io.Writer) error {
 	buf := encodeBufferPool.Get().(*bytes.Buffer)
 	defer encodeBufferPool.Put(buf)
 	buf.Reset()
-	if err := r.encodeTyped(data, buf); err != nil {
+	buf.WriteByte(r.Type)
+	if err := rlp.Encode(buf, data); err != nil {
 		return err
 	}
 	return rlp.Encode(w, buf.Bytes())
-}
-
-// encodeTyped writes the canonical encoding of a typed receipt to w.
-func (r *Receipt) encodeTyped(data *receiptRLP, w *bytes.Buffer) error {
-	w.WriteByte(r.Type)
-	return rlp.Encode(w, data)
-}
-
-// MarshalBinary returns the consensus encoding of the receipt.
-func (r *Receipt) MarshalBinary() ([]byte, error) {
-	if r.Type == LegacyTxType {
-		return rlp.EncodeToBytes(r)
-	}
-	data := &receiptRLP{r.statusEncoding(), r.CumulativeGasUsed, r.Bloom, r.Logs}
-	var buf bytes.Buffer
-	err := r.encodeTyped(data, &buf)
-	return buf.Bytes(), err
 }
 
 // DecodeRLP implements rlp.Decoder, and loads the consensus fields of a receipt
@@ -173,23 +157,6 @@ func (r *Receipt) DecodeRLP(s *rlp.Stream) error {
 		}
 		return r.decodeTyped(b)
 	}
-}
-
-// UnmarshalBinary decodes the consensus encoding of receipts.
-// It supports legacy RLP receipts and EIP-2718 typed receipts.
-func (r *Receipt) UnmarshalBinary(b []byte) error {
-	if len(b) > 0 && b[0] > 0x7f {
-		// It's a legacy receipt decode the RLP
-		var data receiptRLP
-		err := rlp.DecodeBytes(b, &data)
-		if err != nil {
-			return err
-		}
-		r.Type = LegacyTxType
-		return r.setFromRLP(data)
-	}
-	// It's an EIP2718 typed transaction envelope.
-	return r.decodeTyped(b)
 }
 
 // decodeTyped decodes a typed receipt from the canonical format.
@@ -337,6 +304,9 @@ func (rs Receipts) DeriveFields(config *params.ChainConfig, hash common.Hash, nu
 		}
 
 		// block location fields
+		rs[i].BlockHash = hash
+		rs[i].BlockNumber = new(big.Int).SetUint64(number)
+		rs[i].TransactionIndex = uint(i)
 		rs[i].BlockHash = hash
 		rs[i].BlockNumber = new(big.Int).SetUint64(number)
 		rs[i].TransactionIndex = uint(i)

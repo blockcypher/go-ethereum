@@ -589,7 +589,7 @@ func (t *Transaction) RawReceipt(ctx context.Context) (hexutil.Bytes, error) {
 	if err != nil || receipt == nil {
 		return hexutil.Bytes{}, err
 	}
-	return receipt.MarshalBinary()
+	return rlp.EncodeToBytes(receipt)
 }
 
 type BlockType int

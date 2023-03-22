@@ -2061,7 +2061,7 @@ func (api *DebugAPI) GetRawReceipts(ctx context.Context, blockNrOrHash rpc.Block
 	}
 	result := make([]hexutil.Bytes, len(receipts))
 	for i, receipt := range receipts {
-		b, err := receipt.MarshalBinary()
+		b, err := rlp.EncodeToBytes(receipt)
 		if err != nil {
 			return nil, err
 		}
