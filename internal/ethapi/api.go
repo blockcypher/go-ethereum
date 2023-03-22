@@ -25,7 +25,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/blockcypher/go-ethereum/accounts"
 	"github.com/blockcypher/go-ethereum/accounts/abi"
 	"github.com/blockcypher/go-ethereum/accounts/keystore"
@@ -46,6 +45,7 @@ import (
 	"github.com/blockcypher/go-ethereum/params"
 	"github.com/blockcypher/go-ethereum/rlp"
 	"github.com/blockcypher/go-ethereum/rpc"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/tyler-smith/go-bip39"
 )
 
@@ -1977,7 +1977,7 @@ func (api *DebugAPI) GetRawReceipts(ctx context.Context, blockNrOrHash rpc.Block
 	}
 	result := make([]hexutil.Bytes, len(receipts))
 	for i, receipt := range receipts {
-		b, err := receipt.MarshalBinary()
+		b, err := rlp.EncodeToBytes(receipt)
 		if err != nil {
 			return nil, err
 		}
