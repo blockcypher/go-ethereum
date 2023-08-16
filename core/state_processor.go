@@ -31,18 +31,25 @@ import (
 	"github.com/blockcypher/go-ethereum/params"
 )
 
+type blockchain interface {
+	consensus.ChainReader
+
+	// Engine retrieves the chain's consensus engine.
+	Engine() consensus.Engine
+}
+
 // StateProcessor is a basic Processor, which takes care of transitioning
 // state from one point to another.
 //
 // StateProcessor implements Processor.
 type StateProcessor struct {
 	config *params.ChainConfig // Chain configuration options
-	bc     *BlockChain         // Canonical block chain
+	bc     blockchain          // Canonical block chain
 	engine consensus.Engine    // Consensus engine used for block rewards
 }
 
 // NewStateProcessor initialises a new StateProcessor.
-func NewStateProcessor(config *params.ChainConfig, bc *BlockChain, engine consensus.Engine) *StateProcessor {
+func NewStateProcessor(config *params.ChainConfig, bc blockchain, engine consensus.Engine) *StateProcessor {
 	return &StateProcessor{
 		config: config,
 		bc:     bc,
