@@ -28,6 +28,7 @@ import (
 	"github.com/blockcypher/go-ethereum/core"
 	"github.com/blockcypher/go-ethereum/core/rawdb"
 	"github.com/blockcypher/go-ethereum/core/vm"
+	"github.com/blockcypher/go-ethereum/eth/protocols/eth"
 	"github.com/blockcypher/go-ethereum/eth/protocols/snap"
 	"github.com/blockcypher/go-ethereum/p2p"
 	"github.com/blockcypher/go-ethereum/p2p/enode"
@@ -86,7 +87,7 @@ type dummyBackend struct {
 	chain *core.BlockChain
 }
 
-func (d *dummyBackend) Chain() *core.BlockChain                { return d.chain }
+func (d *dummyBackend) Chain() eth.HandlerBlockchain           { return d.chain }
 func (d *dummyBackend) RunPeer(*snap.Peer, snap.Handler) error { return nil }
 func (d *dummyBackend) PeerInfo(enode.ID) interface{}          { return "Foo" }
 func (d *dummyBackend) Handle(*snap.Peer, snap.Packet) error   { return nil }

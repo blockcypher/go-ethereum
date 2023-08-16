@@ -45,7 +45,7 @@ import (
 // downloadTester is a test simulator for mocking out local block chain.
 type downloadTester struct {
 	freezer    string
-	chain      *core.BlockChain
+	chain      eth.HandlerBlockchain
 	downloader *Downloader
 
 	peers map[string]*downloadTesterPeer
