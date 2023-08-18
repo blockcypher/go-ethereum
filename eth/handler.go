@@ -96,6 +96,20 @@ type handlerConfig struct {
 	RequiredBlocks map[uint64]common.Hash // Hard coded map of required block hashes for sync challenges
 }
 
+type Handler handler
+
+func (h *Handler) BroadcastTransactions(txs types.Transactions) {
+	(*handler)(h).BroadcastTransactions(txs)
+}
+
+func (h *Handler) PeerCount() int {
+	return h.peers.len()
+}
+
+func (h *Handler) Start(maxPeers int) {
+	(*handler)(h).Start(maxPeers)
+}
+
 type handler struct {
 	networkID  uint64
 	forkFilter forkid.Filter // Fork ID filter, constant across the lifetime of the node
