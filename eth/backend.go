@@ -117,6 +117,7 @@ func NewMin(handler *handler, chainDb ethdb.Database, ethDialCandidates enode.It
 		networkID:          networkID,
 		chainDb:            chainDb,
 	}
+	ethereum.APIBackend = &EthAPIBackend{eth: &ethereum}
 	return &ethereum
 }
 
