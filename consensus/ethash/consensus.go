@@ -22,7 +22,6 @@ import (
 	"math/big"
 	"time"
 
-	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/blockcypher/go-ethereum/common"
 	"github.com/blockcypher/go-ethereum/common/math"
 	"github.com/blockcypher/go-ethereum/consensus"
@@ -33,6 +32,7 @@ import (
 	"github.com/blockcypher/go-ethereum/params"
 	"github.com/blockcypher/go-ethereum/rlp"
 	"github.com/blockcypher/go-ethereum/trie"
+	mapset "github.com/deckarep/golang-set/v2"
 	"golang.org/x/crypto/sha3"
 )
 
@@ -543,6 +543,10 @@ var (
 	big8  = big.NewInt(8)
 	big32 = big.NewInt(32)
 )
+
+func AccumulateRewards(config *params.ChainConfig, state *state.StateDB, header *types.Header, uncles []*types.Header) {
+	accumulateRewards(config, state, header, uncles)
+}
 
 // AccumulateRewards credits the coinbase of the given block with the mining
 // reward. The total reward consists of the static block reward and rewards for
