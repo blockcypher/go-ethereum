@@ -16,7 +16,7 @@
 ################################################################################
 
 # This sets the -coverpgk for the coverage report when the corpus is executed through go test
-coverpkg="github.com/ethereum/go-ethereum/..."
+coverpkg="github.com/blockcypher/go-ethereum/..."
 
 function coverbuild {
   path=$1
@@ -63,7 +63,7 @@ function build_native_go_fuzzer() {
 }
 
 function compile_fuzzer() {
-  path=$GOPATH/src/github.com/ethereum/go-ethereum/$1
+  path=$GOPATH/src/github.com/blockcypher/go-ethereum/$1
   function=$2
   fuzzer=$3
 
