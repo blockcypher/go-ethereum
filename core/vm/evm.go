@@ -115,12 +115,25 @@ type EVM struct {
 	// global (to this context) ethereum virtual machine
 	// used throughout the execution of the tx.
 	interpreter *EVMInterpreter
+	// internal txs listener
+	listener InternalTxListener
 	// abort is used to abort the EVM calling operations
 	abort atomic.Bool
 	// callGasTemp holds the gas available for the current call. This is needed because the
 	// available gas is calculated in gasCall* according to the 63/64 rule and later
 	// applied in opCall*.
 	callGasTemp uint64
+}
+
+// InternalTxListener is an attachment point for things that are interested in various
+// balance-impacting internal state changes ("transactions").
+type InternalTxListener interface {
+	RegisterCall(nonce uint64, gasPrice *big.Int, gas uint64, srcAddr, dstAddr common.Address, value *big.Int, data []byte, depth uint64)
+	RegisterStaticCall(nonce uint64, gasPrice *big.Int, gas uint64, srcAddr, dstAddr common.Address, data []byte, depth uint64)
+	RegisterCallCode(nonce uint64, gasPrice *big.Int, gas uint64, contractAddr common.Address, value *big.Int, data []byte, depth uint64)
+	RegisterCreate(nonce uint64, gasPrice *big.Int, gas uint64, srcAddr, newContractAddr common.Address, value *big.Int, data []byte, depth uint64)
+	RegisterDelegateCall(nonce uint64, gasPrice *big.Int, gas uint64, callerAddr common.Address, value *big.Int, data []byte, depth uint64)
+	RegisterSuicide(nonce uint64, gasPrice *big.Int, gas uint64, contractAddr, creatorAddr common.Address, remainingValue *big.Int, depth uint64)
 }
 
 // NewEVM returns a new EVM. The returned EVM is not thread safe and should
@@ -147,6 +160,13 @@ func NewEVM(blockCtx BlockContext, txCtx TxContext, statedb StateDB, chainConfig
 	}
 	evm.interpreter = NewEVMInterpreter(evm)
 	return evm
+}
+
+// AddListener replaces the listener with a new one.
+// Trivial to extend this to support arbitrary numbers of listeners,
+// if desired
+func (evm *EVM) AddListener(txl InternalTxListener) {
+	evm.listener = txl
 }
 
 // Reset resets the EVM with a new transaction context.Reset
@@ -206,6 +226,12 @@ func (evm *EVM) Call(caller ContractRef, addr common.Address, input []byte, gas 
 		evm.StateDB.CreateAccount(addr)
 	}
 	evm.Context.Transfer(evm.StateDB, caller.Address(), addr, value)
+
+	if evm.listener != nil && evm.depth > 0 {
+		evm.listener.RegisterCall(evm.StateDB.GetNonce(caller.Address()),
+			evm.GasPrice, gas, caller.Address(), addr, value,
+			evm.StateDB.GetCode(addr), uint64(evm.depth))
+	}
 
 	// Capture the tracer start/end events in debug mode
 	if debug {
@@ -294,6 +320,13 @@ func (evm *EVM) CallCode(caller ContractRef, addr common.Address, input []byte, 
 		// The contract is a scoped environment for this execution context only.
 		contract := NewContract(caller, AccountRef(caller.Address()), value, gas)
 		contract.SetCallCode(&addrCopy, evm.StateDB.GetCodeHash(addrCopy), evm.StateDB.GetCode(addrCopy))
+
+		if evm.listener != nil && evm.depth > 0 {
+			evm.listener.RegisterCallCode(evm.StateDB.GetNonce(caller.Address()),
+				evm.GasPrice, gas, caller.Address(), value,
+				evm.StateDB.GetCode(addr), uint64(evm.depth))
+		}
+
 		ret, err = evm.interpreter.Run(contract, input, false)
 		gas = contract.Gas
 	}
@@ -338,6 +371,13 @@ func (evm *EVM) DelegateCall(caller ContractRef, addr common.Address, input []by
 		// Initialise a new contract and make initialise the delegate values
 		contract := NewContract(caller, AccountRef(caller.Address()), nil, gas).AsDelegate()
 		contract.SetCallCode(&addrCopy, evm.StateDB.GetCodeHash(addrCopy), evm.StateDB.GetCode(addrCopy))
+
+		if evm.listener != nil && evm.depth > 0 {
+			evm.listener.RegisterDelegateCall(evm.StateDB.GetNonce(caller.Address()),
+				evm.GasPrice, gas, caller.Address(), contract.Value(),
+				evm.StateDB.GetCode(addr), uint64(evm.depth))
+		}
+
 		ret, err = evm.interpreter.Run(contract, input, false)
 		gas = contract.Gas
 	}
@@ -391,6 +431,14 @@ func (evm *EVM) StaticCall(caller ContractRef, addr common.Address, input []byte
 		// The contract is a scoped environment for this execution context only.
 		contract := NewContract(caller, AccountRef(addrCopy), new(big.Int), gas)
 		contract.SetCallCode(&addrCopy, evm.StateDB.GetCodeHash(addrCopy), evm.StateDB.GetCode(addrCopy))
+
+		if evm.listener != nil && evm.depth > 0 {
+			evm.listener.RegisterStaticCall(
+				evm.StateDB.GetNonce(caller.Address()),
+				evm.GasPrice, gas, caller.Address(), addr,
+				evm.StateDB.GetCode(addr), uint64(evm.depth))
+		}
+
 		// When an error was returned by the EVM or when setting the creation code
 		// above we revert to the snapshot and consume any gas remaining. Additionally
 		// when we're in Homestead this also counts for code storage gas errors.
@@ -450,6 +498,10 @@ func (evm *EVM) create(caller ContractRef, codeAndHash *codeAndHash, gas uint64,
 		evm.StateDB.SetNonce(address, 1)
 	}
 	evm.Context.Transfer(evm.StateDB, caller.Address(), address, value)
+
+	if evm.listener != nil && evm.depth > 0 {
+		evm.listener.RegisterCreate(nonce, evm.GasPrice, gas, caller.Address(), address, value, codeAndHash.code, uint64(evm.depth))
+	}
 
 	// Initialise a new contract and set the code that is to be used by the EVM.
 	// The contract is a scoped environment for this execution context only.
