@@ -34,6 +34,7 @@ import (
 	"github.com/blockcypher/go-ethereum/core/types"
 	"github.com/blockcypher/go-ethereum/core/vm"
 	"github.com/blockcypher/go-ethereum/crypto"
+	"github.com/blockcypher/go-ethereum/eth/protocols/eth"
 	"github.com/blockcypher/go-ethereum/ethdb"
 	"github.com/blockcypher/go-ethereum/event"
 	"github.com/blockcypher/go-ethereum/params"
@@ -144,8 +145,8 @@ func newTestWorkerBackend(t *testing.T, chainConfig *params.ChainConfig, engine 
 	}
 }
 
-func (b *testWorkerBackend) BlockChain() *core.BlockChain { return b.chain }
-func (b *testWorkerBackend) TxPool() *txpool.TxPool       { return b.txPool }
+func (b *testWorkerBackend) BlockChain() eth.HandlerBlockchain { return b.chain }
+func (b *testWorkerBackend) TxPool() *txpool.TxPool            { return b.txPool }
 
 func (b *testWorkerBackend) newRandomTx(creation bool) *types.Transaction {
 	var tx *types.Transaction

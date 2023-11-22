@@ -29,6 +29,7 @@ import (
 	"github.com/blockcypher/go-ethereum/core/rawdb"
 	"github.com/blockcypher/go-ethereum/core/txpool"
 	"github.com/blockcypher/go-ethereum/core/types"
+	"github.com/blockcypher/go-ethereum/eth/protocols/eth"
 	"github.com/blockcypher/go-ethereum/ethdb"
 	"github.com/blockcypher/go-ethereum/les/flowcontrol"
 	"github.com/blockcypher/go-ethereum/light"
@@ -60,7 +61,7 @@ var (
 // all incoming light requests.
 type serverHandler struct {
 	forkFilter forkid.Filter
-	blockchain *core.BlockChain
+	blockchain eth.HandlerBlockchain
 	chainDb    ethdb.Database
 	txpool     *txpool.TxPool
 	server     *LesServer
@@ -73,7 +74,7 @@ type serverHandler struct {
 	addTxsSync bool
 }
 
-func newServerHandler(server *LesServer, blockchain *core.BlockChain, chainDb ethdb.Database, txpool *txpool.TxPool, synced func() bool) *serverHandler {
+func newServerHandler(server *LesServer, blockchain eth.HandlerBlockchain, chainDb ethdb.Database, txpool *txpool.TxPool, synced func() bool) *serverHandler {
 	handler := &serverHandler{
 		forkFilter: forkid.NewFilter(blockchain),
 		server:     server,
@@ -338,7 +339,7 @@ func (h *serverHandler) handleMsg(p *clientPeer, wg *sync.WaitGroup) error {
 }
 
 // BlockChain implements serverBackend
-func (h *serverHandler) BlockChain() *core.BlockChain {
+func (h *serverHandler) BlockChain() eth.HandlerBlockchain {
 	return h.blockchain
 }
 

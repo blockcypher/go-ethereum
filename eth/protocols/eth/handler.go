@@ -18,17 +18,26 @@ package eth
 
 import (
 	"fmt"
+	"io"
 	"math/big"
 	"time"
 
 	"github.com/blockcypher/go-ethereum/common"
+	"github.com/blockcypher/go-ethereum/consensus"
 	"github.com/blockcypher/go-ethereum/core"
+	"github.com/blockcypher/go-ethereum/core/rawdb"
+	"github.com/blockcypher/go-ethereum/core/state"
+	"github.com/blockcypher/go-ethereum/core/state/snapshot"
 	"github.com/blockcypher/go-ethereum/core/types"
+	"github.com/blockcypher/go-ethereum/core/vm"
+	"github.com/blockcypher/go-ethereum/event"
 	"github.com/blockcypher/go-ethereum/metrics"
 	"github.com/blockcypher/go-ethereum/p2p"
 	"github.com/blockcypher/go-ethereum/p2p/enode"
 	"github.com/blockcypher/go-ethereum/p2p/enr"
 	"github.com/blockcypher/go-ethereum/params"
+	"github.com/blockcypher/go-ethereum/rlp"
+	"github.com/blockcypher/go-ethereum/trie"
 )
 
 const (
@@ -51,6 +60,100 @@ const (
 	maxReceiptsServe = 1024
 )
 
+type HandlerBlockchain interface {
+	SetHead(head uint64) error
+	CurrentBlock() *types.Header
+	CurrentSnapBlock() *types.Header
+
+	Genesis() *types.Block
+
+	HasBlock(hash common.Hash, number uint64) bool
+	HasFastBlock(hash common.Hash, number uint64) bool
+	GetBlock(hash common.Hash, number uint64) *types.Block
+	GetBlockByHash(hash common.Hash) *types.Block
+	StopInsert()
+	InsertBlockWithoutSetHead(block *types.Block) error
+	InsertReceiptChain(blockChain types.Blocks, receiptChain []types.Receipts, ancientLimit uint64) (int, error)
+
+	SetTxLookupLimit(limit uint64)
+	TxLookupLimit() uint64
+
+	InsertChain(chain types.Blocks) (int, error)
+
+	InsertHeaderChain([]*types.Header) (int, error)
+	CurrentHeader() *types.Header
+	GetTd(hash common.Hash, number uint64) *big.Int
+	GetHeader(hash common.Hash, number uint64) *types.Header
+	GetHeaderByHash(hash common.Hash) *types.Header
+	GetHeadersFrom(number, count uint64) []rlp.RawValue
+	HasHeader(hash common.Hash, number uint64) bool
+	GetHeaderByNumber(number uint64) *types.Header
+
+	Config() *params.ChainConfig
+	Engine() consensus.Engine
+
+	// Additionnal func for particular handler
+	// required by snap
+	SnapSyncCommitHead(common.Hash) error
+	Snapshots() *snapshot.Tree
+	StateCache() state.Database
+
+	// required by discovery.go
+	SubscribeChainHeadEvent(ch chan<- core.ChainHeadEvent) event.Subscription
+
+	// required by eth/handler.go
+	GetAncestor(hash common.Hash, number, ancestor uint64, maxNonCanonical *uint64) (common.Hash, uint64)
+	GetBodyRLP(hash common.Hash) rlp.RawValue
+	ContractCodeWithPrefix(hash common.Hash) ([]byte, error)
+	GetReceiptsByHash(hash common.Hash) types.Receipts
+	TrieDB() *trie.Database
+	HasState(hash common.Hash) bool
+
+	// required for eth/handler_test.go
+	GetBlockByNumber(number uint64) *types.Block
+	GetCanonicalHash(number uint64) common.Hash
+	StateAt(root common.Hash) (*state.StateDB, error)
+	Stop()
+
+	// required for eth/api_backend.go
+	CurrentSafeBlock() *types.Header
+	CurrentFinalBlock() *types.Header
+	GetBody(hash common.Hash) *types.Body
+	GetVMConfig() *vm.Config
+	SubscribeChainEvent(ch chan<- core.ChainEvent) event.Subscription
+	SubscribeRemovedLogsEvent(ch chan<- core.RemovedLogsEvent) event.Subscription
+	SubscribeLogsEvent(ch chan<- []*types.Log) event.Subscription
+	SubscribeChainSideEvent(ch chan<- core.ChainSideEvent) event.Subscription
+
+	// required for eth/backend.go
+	Export(w io.Writer) error
+	ExportN(w io.Writer, first uint64, last uint64) error
+	ResetWithGenesisBlock(genesis *types.Block) error
+
+	// required for eth/api.go
+	SetFinalized(block *types.Header)
+	SetSafe(block *types.Header)
+	SetCanonical(head *types.Block) (common.Hash, error)
+	SetTrieFlushInterval(interval time.Duration)
+
+	// required by eth/state_accesor.go
+	Processor() core.Processor
+
+	// required by eth/catalyst/api.go
+	HasBlockAndState(hash common.Hash, number uint64) bool
+
+	// required by miner/worker.go
+	WriteBlockAndSetHead(block *types.Block, receipts []*types.Receipt, logs []*types.Log, state *state.StateDB, emitHeadEvent bool) (status core.WriteStatus, err error)
+	GetBlocksFromHash(hash common.Hash, n int) (blocks []*types.Block)
+
+	// required by les
+	SubscribeBlockProcessingEvent(ch chan<- bool) event.Subscription
+	GetTransactionLookup(hash common.Hash) *rawdb.LegacyTxLookupEntry
+
+	// required by eth/api_debug.go
+	GetTrieFlushInterval() time.Duration
+}
+
 // Handler is a callback to invoke from an outside runner after the boilerplate
 // exchanges have passed.
 type Handler func(peer *Peer) error
@@ -59,7 +162,7 @@ type Handler func(peer *Peer) error
 // callback methods to invoke on remote deliveries.
 type Backend interface {
 	// Chain retrieves the blockchain object to serve data.
-	Chain() *core.BlockChain
+	Chain() HandlerBlockchain
 
 	// TxPool retrieves the transaction pool object to serve data.
 	TxPool() TxPool
@@ -135,7 +238,7 @@ type NodeInfo struct {
 }
 
 // nodeInfo retrieves some `eth` protocol metadata about the running host node.
-func nodeInfo(chain *core.BlockChain, network uint64) *NodeInfo {
+func nodeInfo(chain HandlerBlockchain, network uint64) *NodeInfo {
 	head := chain.CurrentBlock()
 	hash := head.Hash()
 
