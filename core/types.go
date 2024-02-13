@@ -57,4 +57,6 @@ type ProcessResult struct {
 	Requests [][]byte
 	Logs     []*types.Log
 	GasUsed  uint64
+	IntTxs   []types.InternalTransactions
+	VmErrors []string
 }
