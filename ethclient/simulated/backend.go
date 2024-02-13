@@ -19,19 +19,19 @@ package simulated
 import (
 	"time"
 
-	"github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/eth"
-	"github.com/ethereum/go-ethereum/eth/catalyst"
-	"github.com/ethereum/go-ethereum/eth/downloader"
-	"github.com/ethereum/go-ethereum/eth/ethconfig"
-	"github.com/ethereum/go-ethereum/eth/filters"
-	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/blockcypher/go-ethereum"
+	"github.com/blockcypher/go-ethereum/common"
+	"github.com/blockcypher/go-ethereum/core"
+	"github.com/blockcypher/go-ethereum/eth"
+	"github.com/blockcypher/go-ethereum/eth/catalyst"
+	"github.com/blockcypher/go-ethereum/eth/downloader"
+	"github.com/blockcypher/go-ethereum/eth/ethconfig"
+	"github.com/blockcypher/go-ethereum/eth/filters"
+	"github.com/blockcypher/go-ethereum/ethclient"
+	"github.com/blockcypher/go-ethereum/node"
+	"github.com/blockcypher/go-ethereum/p2p"
+	"github.com/blockcypher/go-ethereum/params"
+	"github.com/blockcypher/go-ethereum/rpc"
 )
 
 // Client exposes the methods provided by the Ethereum RPC client.
