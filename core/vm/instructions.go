@@ -804,6 +804,14 @@ func opSelfdestruct(pc *uint64, interpreter *EVMInterpreter, scope *ScopeContext
 	balance := interpreter.evm.StateDB.GetBalance(scope.Contract.Address())
 	interpreter.evm.StateDB.AddBalance(beneficiary.Bytes20(), balance)
 	interpreter.evm.StateDB.SelfDestruct(scope.Contract.Address())
+	if interpreter.evm.listener != nil {
+		dstAddr := common.BigToAddress(beneficiary.ToBig())
+		interpreter.evm.listener.RegisterSuicide(
+			interpreter.evm.StateDB.GetNonce(scope.Contract.Address()),
+			interpreter.evm.GasPrice, scope.Contract.Gas,
+			scope.Contract.Address(), dstAddr, balance.ToBig(),
+			uint64(interpreter.evm.depth))
+	}
 	if tracer := interpreter.evm.Config.Tracer; tracer != nil {
 		tracer.CaptureEnter(SELFDESTRUCT, scope.Contract.Address(), beneficiary.Bytes20(), []byte{}, 0, balance.ToBig())
 		tracer.CaptureExit([]byte{}, 0, nil)
@@ -820,6 +828,14 @@ func opSelfdestruct6780(pc *uint64, interpreter *EVMInterpreter, scope *ScopeCon
 	interpreter.evm.StateDB.SubBalance(scope.Contract.Address(), balance)
 	interpreter.evm.StateDB.AddBalance(beneficiary.Bytes20(), balance)
 	interpreter.evm.StateDB.Selfdestruct6780(scope.Contract.Address())
+	if interpreter.evm.listener != nil {
+		dstAddr := common.BigToAddress(beneficiary.ToBig())
+		interpreter.evm.listener.RegisterSuicide(
+			interpreter.evm.StateDB.GetNonce(scope.Contract.Address()),
+			interpreter.evm.GasPrice, scope.Contract.Gas,
+			scope.Contract.Address(), dstAddr, balance.ToBig(),
+			uint64(interpreter.evm.depth))
+	}
 	if tracer := interpreter.evm.Config.Tracer; tracer != nil {
 		tracer.CaptureEnter(SELFDESTRUCT, scope.Contract.Address(), beneficiary.Bytes20(), []byte{}, 0, balance.ToBig())
 		tracer.CaptureExit([]byte{}, 0, nil)
