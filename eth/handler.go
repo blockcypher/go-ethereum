@@ -80,6 +80,8 @@ type txPool interface {
 	SubscribeTransactions(ch chan<- core.NewTxsEvent, reorgs bool) event.Subscription
 }
 
+type HandlerConfig handlerConfig
+
 // handlerConfig is the collection of initialization parameters to create a full
 // node network handler.
 type handlerConfig struct {
@@ -92,6 +94,20 @@ type handlerConfig struct {
 	BloomCache     uint64                 // Megabytes to alloc for snap sync bloom
 	EventMux       *event.TypeMux         // Legacy event mux, deprecate for `feed`
 	RequiredBlocks map[uint64]common.Hash // Hard coded map of required block hashes for sync challenges
+}
+
+type Handler handler
+
+func (h *Handler) BroadcastTransactions(txs types.Transactions) {
+	(*handler)(h).BroadcastTransactions(txs)
+}
+
+func (h *Handler) PeerCount() int {
+	return h.peers.len()
+}
+
+func (h *Handler) Start(maxPeers int) {
+	(*handler)(h).Start(maxPeers)
 }
 
 type handler struct {
@@ -124,6 +140,11 @@ type handler struct {
 
 	handlerStartCh chan struct{}
 	handlerDoneCh  chan struct{}
+}
+
+func NewHandler(config *HandlerConfig) (*handler, error) {
+	conf := handlerConfig(*config)
+	return newHandler(&conf)
 }
 
 // newHandler returns a handler for all Ethereum chain management protocol.
