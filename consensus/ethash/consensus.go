@@ -564,7 +564,17 @@ func (ethash *Ethash) SealHash(header *types.Header) (hash common.Hash) {
 	return hash
 }
 
-// accumulateRewards credits the coinbase of the given block with the mining
+// Some weird constants to avoid constant memory allocs for them.
+var (
+	u256_8  = uint256.NewInt(8)
+	u256_32 = uint256.NewInt(32)
+)
+
+func AccumulateRewards(config *params.ChainConfig, state *state.StateDB, header *types.Header, uncles []*types.Header) {
+	accumulateRewards(config, state, header, uncles)
+}
+
+// AccumulateRewards credits the coinbase of the given block with the mining
 // reward. The total reward consists of the static block reward and rewards for
 // included uncles. The coinbase of each uncle block is also rewarded.
 func accumulateRewards(config *params.ChainConfig, stateDB vm.StateDB, header *types.Header, uncles []*types.Header) {

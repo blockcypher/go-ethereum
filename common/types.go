@@ -91,6 +91,8 @@ func (h Hash) TerminalString() string {
 	return fmt.Sprintf("%x..%x", h[:3], h[29:])
 }
 
+func (a Address) Str() string { return string(a[:]) }
+
 // String implements the stringer interface and is used also by the logger when
 // doing full logging into a file.
 func (h Hash) String() string {
