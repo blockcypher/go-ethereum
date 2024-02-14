@@ -87,7 +87,7 @@ type HandlerConfig handlerConfig
 // node network handler.
 type handlerConfig struct {
 	Database       ethdb.Database         // Database for direct sync insertions
-	Chain          *core.BlockChain       // Blockchain to serve data from
+	Chain          eth.HandlerBlockchain  // Blockchain to serve data from
 	TxPool         txPool                 // Transaction pool to propagate from
 	Merger         *consensus.Merger      // The manager for eth1/2 transition
 	Network        uint64                 // Network identifier to advertise
@@ -120,7 +120,7 @@ type handler struct {
 
 	database ethdb.Database
 	txpool   txPool
-	chain    *core.BlockChain
+	chain    eth.HandlerBlockchain
 	maxPeers int
 
 	downloader   *downloader.Downloader
