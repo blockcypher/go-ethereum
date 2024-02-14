@@ -21,6 +21,7 @@ import (
 	"math/big"
 
 	"github.com/blockcypher/go-ethereum/common"
+	"github.com/blockcypher/go-ethereum/consensus"
 	"github.com/blockcypher/go-ethereum/consensus/misc"
 	"github.com/blockcypher/go-ethereum/core/state"
 	"github.com/blockcypher/go-ethereum/core/tracing"
@@ -30,17 +31,24 @@ import (
 	"github.com/blockcypher/go-ethereum/params"
 )
 
+type blockchain interface {
+	consensus.ChainReader
+
+	// Engine retrieves the chain's consensus engine.
+	Engine() consensus.Engine
+}
+
 // StateProcessor is a basic Processor, which takes care of transitioning
 // state from one point to another.
 //
 // StateProcessor implements Processor.
 type StateProcessor struct {
 	config *params.ChainConfig // Chain configuration options
-	chain  *HeaderChain        // Canonical header chain
+	chain  blockchain        // Canonical header chain
 }
 
 // NewStateProcessor initialises a new StateProcessor.
-func NewStateProcessor(config *params.ChainConfig, chain *HeaderChain) *StateProcessor {
+func NewStateProcessor(config *params.ChainConfig, chain blockchain) *StateProcessor {
 	return &StateProcessor{
 		config: config,
 		chain:  chain,
@@ -123,7 +131,7 @@ func (p *StateProcessor) Process(block *types.Block, statedb *state.StateDB, cfg
 	}
 
 	// Finalize the block, applying any consensus engine specific extras (e.g. block rewards)
-	p.chain.engine.Finalize(p.chain, header, tracingStateDB, block.Body())
+	p.chain.Engine().Finalize(p.chain, header, tracingStateDB, block.Body())
 
 	return &ProcessResult{
 		Receipts: receipts,
