@@ -30,6 +30,13 @@ import (
 	"github.com/blockcypher/go-ethereum/params"
 )
 
+type blockchain interface {
+	consensus.ChainReader
+
+	// Engine retrieves the chain's consensus engine.
+	Engine() consensus.Engine
+}
+
 // StateProcessor is a basic Processor, which takes care of transitioning
 // state from one point to another.
 //
