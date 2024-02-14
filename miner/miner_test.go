@@ -34,6 +34,7 @@ import (
 	"github.com/blockcypher/go-ethereum/core/vm"
 	"github.com/blockcypher/go-ethereum/crypto"
 	"github.com/blockcypher/go-ethereum/eth/downloader"
+	"github.com/blockcypher/go-ethereum/eth/protocols/eth"
 	"github.com/blockcypher/go-ethereum/event"
 	"github.com/blockcypher/go-ethereum/params"
 	"github.com/blockcypher/go-ethereum/trie"
@@ -52,7 +53,7 @@ func NewMockBackend(bc *core.BlockChain, txPool *txpool.TxPool) *mockBackend {
 	}
 }
 
-func (m *mockBackend) BlockChain() *core.BlockChain {
+func (m *mockBackend) BlockChain() eth.HandlerBlockchain {
 	return m.bc
 }
 

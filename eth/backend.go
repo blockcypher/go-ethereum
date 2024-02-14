@@ -70,7 +70,7 @@ type Ethereum struct {
 	// Handlers
 	txPool *txpool.TxPool
 
-	blockchain         *core.BlockChain
+	blockchain         eth.HandlerBlockchain
 	handler            *handler
 	ethDialCandidates  enode.Iterator
 	snapDialCandidates enode.Iterator
@@ -101,6 +101,24 @@ type Ethereum struct {
 	lock sync.RWMutex // Protects the variadic fields (e.g. gas price and etherbase)
 
 	shutdownTracker *shutdowncheck.ShutdownTracker // Tracks if and when the node has shutdown ungracefully
+}
+
+func NewMin(handler *handler, chainDb ethdb.Database, ethDialCandidates enode.Iterator, snapDialCandidates enode.Iterator, networkID uint64, bc eth.HandlerBlockchain, merger *consensus.Merger, params *params.ChainConfig) *Ethereum {
+	conf := ethconfig.Defaults
+	conf.SyncMode = downloader.FullSync
+	conf.SnapshotCache = 0
+	ethereum := Ethereum{
+		blockchain:         bc,
+		merger:             merger,
+		config:             &conf,
+		handler:            handler,
+		ethDialCandidates:  ethDialCandidates,
+		snapDialCandidates: snapDialCandidates,
+		networkID:          networkID,
+		chainDb:            chainDb,
+	}
+	ethereum.APIBackend = &EthAPIBackend{eth: &ethereum}
+	return &ethereum
 }
 
 // New creates a new Ethereum object (including the
@@ -475,7 +493,7 @@ func (s *Ethereum) IsMining() bool      { return s.miner.Mining() }
 func (s *Ethereum) Miner() *miner.Miner { return s.miner }
 
 func (s *Ethereum) AccountManager() *accounts.Manager  { return s.accountManager }
-func (s *Ethereum) BlockChain() *core.BlockChain       { return s.blockchain }
+func (s *Ethereum) BlockChain() eth.HandlerBlockchain  { return s.blockchain }
 func (s *Ethereum) TxPool() *txpool.TxPool             { return s.txPool }
 func (s *Ethereum) EventMux() *event.TypeMux           { return s.eventMux }
 func (s *Ethereum) Engine() consensus.Engine           { return s.engine }
