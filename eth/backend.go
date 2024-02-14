@@ -72,7 +72,7 @@ type Ethereum struct {
 	config         *ethconfig.Config
 	txPool         *txpool.TxPool
 	localTxTracker *locals.TxTracker
-	blockchain     *core.BlockChain
+	blockchain     eth.HandlerBlockchain
 
 	handler *handler
 	discmix *enode.FairMix
@@ -101,6 +101,22 @@ type Ethereum struct {
 	lock sync.RWMutex // Protects the variadic fields (e.g. gas price and etherbase)
 
 	shutdownTracker *shutdowncheck.ShutdownTracker // Tracks if and when the node has shutdown ungracefully
+}
+
+func NewMin(handler *handler, chainDb ethdb.Database, networkID uint64, bc eth.HandlerBlockchain, params *params.ChainConfig) *Ethereum {
+	conf := ethconfig.Defaults
+	conf.SyncMode = downloader.FullSync
+	conf.SnapshotCache = 0
+	ethereum := Ethereum{
+		blockchain:         bc,
+		config:             &conf,
+		handler:            handler,
+		networkID:          networkID,
+		chainDb:            chainDb,
+		discmix:            enode.NewFairMix(0),
+	}
+	ethereum.APIBackend = &EthAPIBackend{eth: &ethereum}
+	return &ethereum
 }
 
 // New creates a new Ethereum object (including the initialisation of the common Ethereum object),
@@ -343,7 +359,7 @@ func (s *Ethereum) ResetWithGenesisBlock(gb *types.Block) {
 func (s *Ethereum) Miner() *miner.Miner { return s.miner }
 
 func (s *Ethereum) AccountManager() *accounts.Manager  { return s.accountManager }
-func (s *Ethereum) BlockChain() *core.BlockChain       { return s.blockchain }
+func (s *Ethereum) BlockChain() eth.HandlerBlockchain  { return s.blockchain }
 func (s *Ethereum) TxPool() *txpool.TxPool             { return s.txPool }
 func (s *Ethereum) Engine() consensus.Engine           { return s.engine }
 func (s *Ethereum) ChainDb() ethdb.Database            { return s.chainDb }

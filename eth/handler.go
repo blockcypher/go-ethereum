@@ -87,7 +87,7 @@ type HandlerConfig handlerConfig
 type handlerConfig struct {
 	NodeID         enode.ID               // P2P node ID used for tx propagation topology
 	Database       ethdb.Database         // Database for direct sync insertions
-	Chain          *core.BlockChain       // Blockchain to serve data from
+	Chain          eth.HandlerBlockchain  // Blockchain to serve data from
 	TxPool         txPool                 // Transaction pool to propagate from
 	Network        uint64                 // Network identifier to advertise
 	Sync           ethconfig.SyncMode     // Whether to snap or full sync
@@ -120,7 +120,7 @@ type handler struct {
 
 	database ethdb.Database
 	txpool   txPool
-	chain    *core.BlockChain
+	chain    eth.HandlerBlockchain
 	maxPeers int
 
 	downloader *downloader.Downloader
