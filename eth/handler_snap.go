@@ -17,7 +17,7 @@
 package eth
 
 import (
-	"github.com/blockcypher/go-ethereum/core"
+	"github.com/blockcypher/go-ethereum/eth/protocols/eth"
 	"github.com/blockcypher/go-ethereum/eth/protocols/snap"
 	"github.com/blockcypher/go-ethereum/p2p/enode"
 )
@@ -26,7 +26,7 @@ import (
 // packets that are sent as replies or broadcasts.
 type snapHandler handler
 
-func (h *snapHandler) Chain() *core.BlockChain { return h.chain }
+func (h *snapHandler) Chain() eth.HandlerBlockchain { return h.chain }
 
 // RunPeer is invoked when a peer joins on the `snap` protocol.
 func (h *snapHandler) RunPeer(peer *snap.Peer, hand snap.Handler) error {

@@ -23,7 +23,6 @@ import (
 	"time"
 
 	"github.com/blockcypher/go-ethereum/common"
-	"github.com/blockcypher/go-ethereum/core"
 	"github.com/blockcypher/go-ethereum/core/types"
 	"github.com/blockcypher/go-ethereum/log"
 	"github.com/blockcypher/go-ethereum/p2p/tracker"
@@ -46,7 +45,7 @@ func handleGetBlockHeaders(backend Backend, msg Decoder, peer *Peer) error {
 
 // ServiceGetBlockHeadersQuery assembles the response to a header query. It is
 // exposed to allow external packages to test protocol behavior.
-func ServiceGetBlockHeadersQuery(chain *core.BlockChain, query *GetBlockHeadersRequest, peer *Peer) []rlp.RawValue {
+func ServiceGetBlockHeadersQuery(chain HandlerBlockchain, query *GetBlockHeadersRequest, peer *Peer) []rlp.RawValue {
 	if query.Amount == 0 {
 		return nil
 	}
@@ -58,7 +57,7 @@ func ServiceGetBlockHeadersQuery(chain *core.BlockChain, query *GetBlockHeadersR
 	}
 }
 
-func serviceNonContiguousBlockHeaderQuery(chain *core.BlockChain, query *GetBlockHeadersRequest, peer *Peer) []rlp.RawValue {
+func serviceNonContiguousBlockHeaderQuery(chain HandlerBlockchain, query *GetBlockHeadersRequest, peer *Peer) []rlp.RawValue {
 	hashMode := query.Origin.Hash != (common.Hash{})
 	first := true
 	maxNonCanonical := uint64(100)
@@ -154,7 +153,7 @@ func serviceNonContiguousBlockHeaderQuery(chain *core.BlockChain, query *GetBloc
 	return headers
 }
 
-func serviceContiguousBlockHeaderQuery(chain *core.BlockChain, query *GetBlockHeadersRequest) []rlp.RawValue {
+func serviceContiguousBlockHeaderQuery(chain HandlerBlockchain, query *GetBlockHeadersRequest) []rlp.RawValue {
 	count := query.Amount
 	if count > maxHeadersServe {
 		count = maxHeadersServe
@@ -229,7 +228,7 @@ func handleGetBlockBodies(backend Backend, msg Decoder, peer *Peer) error {
 
 // ServiceGetBlockBodiesQuery assembles the response to a body query. It is
 // exposed to allow external packages to test protocol behavior.
-func ServiceGetBlockBodiesQuery(chain *core.BlockChain, query GetBlockBodiesRequest) []rlp.RawValue {
+func ServiceGetBlockBodiesQuery(chain HandlerBlockchain, query GetBlockBodiesRequest) []rlp.RawValue {
 	// Gather blocks until the fetch or network limits is reached
 	var (
 		bytes  int
@@ -270,7 +269,7 @@ func handleGetReceipts69(backend Backend, msg Decoder, peer *Peer) error {
 
 // ServiceGetReceiptsQuery68 assembles the response to a receipt query. It is
 // exposed to allow external packages to test protocol behavior.
-func ServiceGetReceiptsQuery68(chain *core.BlockChain, query GetReceiptsRequest) []rlp.RawValue {
+func ServiceGetReceiptsQuery68(chain HandlerBlockchain, query GetReceiptsRequest) []rlp.RawValue {
 	// Gather state data until the fetch or network limits is reached
 	var (
 		bytes    int

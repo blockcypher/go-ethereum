@@ -416,7 +416,7 @@ func (s *Ethereum) ResetWithGenesisBlock(gb *types.Block) {
 func (s *Ethereum) Miner() *miner.Miner { return s.miner }
 
 func (s *Ethereum) AccountManager() *accounts.Manager  { return s.accountManager }
-func (s *Ethereum) BlockChain() *core.BlockChain       { return s.blockchain }
+func (s *Ethereum) BlockChain() eth.HandlerBlockchain  { return s.blockchain }
 func (s *Ethereum) TxPool() *txpool.TxPool             { return s.txPool }
 func (s *Ethereum) BlobTxPool() *blobpool.BlobPool     { return s.blobTxPool }
 func (s *Ethereum) Engine() consensus.Engine           { return s.engine }
