@@ -37,7 +37,7 @@ import (
 	"github.com/blockcypher/go-ethereum/p2p/enr"
 	"github.com/blockcypher/go-ethereum/params"
 	"github.com/blockcypher/go-ethereum/rlp"
-	"github.com/blockcypher/go-ethereum/trie"
+	"github.com/blockcypher/go-ethereum/triedb"
 )
 
 const (
@@ -103,7 +103,7 @@ type HandlerBlockchain interface {
 	GetBodyRLP(hash common.Hash) rlp.RawValue
 	ContractCodeWithPrefix(hash common.Hash) ([]byte, error)
 	GetReceiptsByHash(hash common.Hash) types.Receipts
-	TrieDB() *trie.Database
+	TrieDB() *triedb.Database
 	HasState(hash common.Hash) bool
 
 	// required for eth/handler_test.go
