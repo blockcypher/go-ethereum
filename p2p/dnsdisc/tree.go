@@ -25,10 +25,10 @@ import (
 	"io"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/p2p/enr"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/blockcypher/go-ethereum/crypto"
+	"github.com/blockcypher/go-ethereum/p2p/enode"
+	"github.com/blockcypher/go-ethereum/p2p/enr"
+	"github.com/blockcypher/go-ethereum/rlp"
 	"golang.org/x/crypto/sha3"
 	"golang.org/x/exp/slices"
 )
