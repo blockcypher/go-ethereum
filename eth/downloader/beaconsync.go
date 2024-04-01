@@ -61,6 +61,9 @@ func (b *beaconBackfiller) suspend() *types.Header {
 	b.lock.Unlock()
 
 	if !filling {
+        if filled == nil {
+            filled = b.downloader.blockchain.CurrentSnapBlock()
+        }
 		return filled // Return the filled header on the previous sync completion
 	}
 	// A previous filling should be running, though it may happen that it hasn't

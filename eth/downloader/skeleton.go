@@ -199,6 +199,7 @@ type backfiller interface {
 // is wasted disk IO, but it's a price we're going to pay to keep things simple
 // for now.
 type skeleton struct {
+    chain  BlockChain 
 	db     ethdb.Database // Database backing the skeleton
 	filler backfiller     // Chain syncer suspended/resumed by head events
 
@@ -227,8 +228,9 @@ type skeleton struct {
 
 // newSkeleton creates a new sync skeleton that tracks a potentially dangling
 // header chain until it's linked into an existing set of blocks.
-func newSkeleton(db ethdb.Database, peers *peerSet, drop peerDropFn, filler backfiller) *skeleton {
+func newSkeleton(chain BlockChain, db ethdb.Database, peers *peerSet, drop peerDropFn, filler backfiller) *skeleton {
 	sk := &skeleton{
+        chain:      chain,
 		db:         db,
 		filler:     filler,
 		peers:      peers,
@@ -367,10 +369,12 @@ func (s *skeleton) sync(head *types.Header) (*types.Header, error) {
 
 	// If the sync is already done, resume the backfiller. When the loop stops,
 	// terminate the backfiller too.
-	linked := len(s.progress.Subchains) == 1 &&
-		rawdb.HasHeader(s.db, s.progress.Subchains[0].Next, s.scratchHead) &&
-		rawdb.HasBody(s.db, s.progress.Subchains[0].Next, s.scratchHead) &&
-		rawdb.HasReceipts(s.db, s.progress.Subchains[0].Next, s.scratchHead)
+	// linked := len(s.progress.Subchains) == 1 &&
+	// 	rawdb.HasHeader(s.db, s.progress.Subchains[0].Next, s.scratchHead) &&
+	// 	rawdb.HasBody(s.db, s.progress.Subchains[0].Next, s.scratchHead) &&
+	// 	rawdb.HasReceipts(s.db, s.progress.Subchains[0].Next, s.scratchHead)
+    linked := len(s.progress.Subchains) == 1 && 
+        s.chain.HasBlock(s.progress.Subchains[0].Next, s.scratchHead)
 	if linked {
 		s.filler.resume()
 	}
@@ -936,6 +940,9 @@ func (s *skeleton) processResponse(res *headerResponse) (linked bool, merged boo
 	if s.scratchSpace[0] == nil {
 		return false, false
 	}
+
+    chainHead := s.chain.CurrentHeader()
+
 	// Try to consume any head headers, validating the boundary conditions
 	batch := s.db.NewBatch()
 	for s.scratchSpace[0] != nil {
@@ -982,9 +989,12 @@ func (s *skeleton) processResponse(res *headerResponse) (linked bool, merged boo
 				// processing is done, so it's just one more "needless" check.
 				//
 				// The weird cascading checks are done to minimize the database reads.
-				linked = rawdb.HasHeader(s.db, header.ParentHash, header.Number.Uint64()-1) &&
-					rawdb.HasBody(s.db, header.ParentHash, header.Number.Uint64()-1) &&
-					rawdb.HasReceipts(s.db, header.ParentHash, header.Number.Uint64()-1)
+				// linked = rawdb.HasHeader(s.db, header.ParentHash, header.Number.Uint64()-1) &&
+				// 	rawdb.HasBody(s.db, header.ParentHash, header.Number.Uint64()-1) &&
+				// 	rawdb.HasReceipts(s.db, header.ParentHash, header.Number.Uint64()-1)
+                if header.Number.Uint64() - 1 <= chainHead.Number.Uint64() {
+                    linked = s.chain.HasBlock(header.ParentHash, header.Number.Uint64()-1)
+                }
 				if linked {
 					break
 				}
