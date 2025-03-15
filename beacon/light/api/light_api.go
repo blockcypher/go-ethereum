@@ -29,12 +29,12 @@ import (
 	"time"
 
 	"github.com/donovanhide/eventsource"
-	"github.com/ethereum/go-ethereum/beacon/merkle"
-	"github.com/ethereum/go-ethereum/beacon/params"
-	"github.com/ethereum/go-ethereum/beacon/types"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/blockcypher/go-ethereum/beacon/merkle"
+	"github.com/blockcypher/go-ethereum/beacon/params"
+	"github.com/blockcypher/go-ethereum/beacon/types"
+	"github.com/blockcypher/go-ethereum/common"
+	"github.com/blockcypher/go-ethereum/common/hexutil"
+	"github.com/blockcypher/go-ethereum/log"
 )
 
 var (

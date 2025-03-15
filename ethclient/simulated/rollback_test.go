@@ -23,7 +23,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/blockcypher/go-ethereum/core/types"
 )
 
 // TestTransactionRollbackBehavior tests that calling Rollback on the simulated backend doesn't prevent subsequent

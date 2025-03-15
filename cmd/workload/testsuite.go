@@ -22,9 +22,9 @@ import (
 	"os"
 	"slices"
 
-	"github.com/ethereum/go-ethereum/internal/flags"
-	"github.com/ethereum/go-ethereum/internal/utesting"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/blockcypher/go-ethereum/internal/flags"
+	"github.com/blockcypher/go-ethereum/internal/utesting"
+	"github.com/blockcypher/go-ethereum/log"
 	"github.com/urfave/cli/v2"
 )
 
