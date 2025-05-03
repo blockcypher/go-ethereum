@@ -80,6 +80,8 @@ type HandlerBlockchain interface {
 	InsertChain(chain types.Blocks) (int, error)
 
 	InsertHeaderChain([]*types.Header) (int, error)
+	InsertHeadersBeforeCutoff(headers []*types.Header) (int, error)
+
 	CurrentHeader() *types.Header
 	// GetTd(hash common.Hash, number uint64) *big.Int
 	GetHeader(hash common.Hash, number uint64) *types.Header
@@ -123,11 +125,13 @@ type HandlerBlockchain interface {
 	SubscribeRemovedLogsEvent(ch chan<- core.RemovedLogsEvent) event.Subscription
 	SubscribeLogsEvent(ch chan<- []*types.Log) event.Subscription
     	TxIndexProgress() (core.TxIndexProgress, error)
+	GetBlockNumber(hash common.Hash) *uint64
 
 	// required for eth/backend.go
 	Export(w io.Writer) error
 	ExportN(w io.Writer, first uint64, last uint64) error
 	ResetWithGenesisBlock(genesis *types.Block) error
+	HistoryPruningCutoff() (uint64, common.Hash)
 
 	// required for eth/api.go
 	SetFinalized(block *types.Header)
