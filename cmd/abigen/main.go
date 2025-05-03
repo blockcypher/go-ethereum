@@ -25,8 +25,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/blockcypher/go-ethereum/accounts/abi"
-	"github.com/blockcypher/go-ethereum/accounts/abi/bind"
+	"github.com/blockcypher/go-ethereum/accounts/abi/abigen"
 	"github.com/blockcypher/go-ethereum/cmd/utils"
 	"github.com/blockcypher/go-ethereum/common/compiler"
 	"github.com/blockcypher/go-ethereum/crypto"
@@ -83,14 +82,13 @@ var (
 		Name:  "out",
 		Usage: "Output file for the generated binding (default = stdout)",
 	}
-	langFlag = &cli.StringFlag{
-		Name:  "lang",
-		Usage: "Destination language for the bindings (go)",
-		Value: "go",
-	}
 	aliasFlag = &cli.StringFlag{
 		Name:  "alias",
-		Usage: "Comma separated aliases for function and event renaming, e.g. original1=alias1, original2=alias2",
+		Usage: "Comma separated aliases for function and event renaming.  If --v2 is set, errors are aliased as well. e.g. original1=alias1, original2=alias2",
+	}
+	v2Flag = &cli.BoolFlag{
+		Name:  "v2",
+		Usage: "Generates v2 bindings",
 	}
 )
 
@@ -110,27 +108,25 @@ func init() {
 		excFlag,
 		pkgFlag,
 		outFlag,
-		langFlag,
 		aliasFlag,
+		v2Flag,
 	}
-	app.Action = abigen
+	app.Action = generate
 }
 
+<<<<<<< HEAD
 func abigen(c *cli.Context) error {
 	flags.CheckExclusive(c, abiFlag, jsonFlag, solFlag, vyFlag) // Only one source can be selected.
+=======
+func generate(c *cli.Context) error {
+	flags.CheckExclusive(c, abiFlag, jsonFlag) // Only one source can be selected.
+>>>>>>> 2bf8a78984d70e8d5a695879494b17193f1bcf57
 
 	if c.String(pkgFlag.Name) == "" {
 		utils.Fatalf("No destination package specified (--pkg)")
 	}
 	if c.String(abiFlag.Name) == "" && c.String(jsonFlag.Name) == "" {
 		utils.Fatalf("Either contract ABI source (--abi) or combined-json (--combined-json) are required")
-	}
-	var lang bind.Lang
-	switch c.String(langFlag.Name) {
-	case "go":
-		lang = bind.LangGo
-	default:
-		utils.Fatalf("Unsupported destination language \"%s\" (--lang)", c.String(langFlag.Name))
 	}
 	// If the entire solidity code was specified, build and bind based on that
 	var (
@@ -267,7 +263,15 @@ func abigen(c *cli.Context) error {
 		}
 	}
 	// Generate the contract binding
-	code, err := bind.Bind(types, abis, bins, sigs, c.String(pkgFlag.Name), lang, libs, aliases)
+	var (
+		code string
+		err  error
+	)
+	if c.IsSet(v2Flag.Name) {
+		code, err = abigen.BindV2(types, abis, bins, c.String(pkgFlag.Name), libs, aliases)
+	} else {
+		code, err = abigen.Bind(types, abis, bins, sigs, c.String(pkgFlag.Name), libs, aliases)
+	}
 	if err != nil {
 		utils.Fatalf("Failed to generate ABI binding: %v", err)
 	}

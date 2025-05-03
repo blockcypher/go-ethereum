@@ -30,7 +30,7 @@ import (
 	"github.com/blockcypher/go-ethereum/common/hexutil"
 	"github.com/blockcypher/go-ethereum/consensus"
 	"github.com/blockcypher/go-ethereum/core"
-	"github.com/blockcypher/go-ethereum/core/bloombits"
+	"github.com/blockcypher/go-ethereum/core/filtermaps"
 	"github.com/blockcypher/go-ethereum/core/state"
 	"github.com/blockcypher/go-ethereum/core/types"
 	"github.com/blockcypher/go-ethereum/core/vm"
@@ -393,12 +393,15 @@ func (b *backendMock) TxPoolContent() (map[common.Address][]*types.Transaction, 
 func (b *backendMock) TxPoolContentFrom(addr common.Address) ([]*types.Transaction, []*types.Transaction) {
 	return nil, nil
 }
-func (b *backendMock) SubscribeNewTxsEvent(chan<- core.NewTxsEvent) event.Subscription      { return nil }
-func (b *backendMock) BloomStatus() (uint64, uint64)                                        { return 0, 0 }
-func (b *backendMock) ServiceFilter(ctx context.Context, session *bloombits.MatcherSession) {}
-func (b *backendMock) SubscribeLogsEvent(ch chan<- []*types.Log) event.Subscription         { return nil }
+func (b *backendMock) SubscribeNewTxsEvent(chan<- core.NewTxsEvent) event.Subscription { return nil }
+func (b *backendMock) SubscribeLogsEvent(ch chan<- []*types.Log) event.Subscription    { return nil }
 func (b *backendMock) SubscribeRemovedLogsEvent(ch chan<- core.RemovedLogsEvent) event.Subscription {
 	return nil
 }
 
 func (b *backendMock) Engine() consensus.Engine { return nil }
+
+func (b *backendMock) CurrentView() *filtermaps.ChainView           { return nil }
+func (b *backendMock) NewMatcherBackend() filtermaps.MatcherBackend { return nil }
+
+func (b *backendMock) HistoryPruningCutoff() uint64 { return 0 }

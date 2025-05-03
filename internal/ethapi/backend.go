@@ -27,7 +27,7 @@ import (
 	"github.com/blockcypher/go-ethereum/common"
 	"github.com/blockcypher/go-ethereum/consensus"
 	"github.com/blockcypher/go-ethereum/core"
-	"github.com/blockcypher/go-ethereum/core/bloombits"
+	"github.com/blockcypher/go-ethereum/core/filtermaps"
 	"github.com/blockcypher/go-ethereum/core/state"
 	"github.com/blockcypher/go-ethereum/core/types"
 	"github.com/blockcypher/go-ethereum/core/vm"
@@ -85,6 +85,7 @@ type Backend interface {
 
 	ChainConfig() *params.ChainConfig
 	Engine() consensus.Engine
+	HistoryPruningCutoff() uint64
 
 	// This is copied from filters.Backend
 	// eth/filters needs to be initialized from this backend type, so methods needed by
@@ -93,8 +94,9 @@ type Backend interface {
 	GetLogs(ctx context.Context, blockHash common.Hash, number uint64) ([][]*types.Log, error)
 	SubscribeRemovedLogsEvent(ch chan<- core.RemovedLogsEvent) event.Subscription
 	SubscribeLogsEvent(ch chan<- []*types.Log) event.Subscription
-	BloomStatus() (uint64, uint64)
-	ServiceFilter(ctx context.Context, session *bloombits.MatcherSession)
+
+	CurrentView() *filtermaps.ChainView
+	NewMatcherBackend() filtermaps.MatcherBackend
 }
 
 func GetAPIs(apiBackend Backend) []rpc.API {
