@@ -36,7 +36,7 @@ import (
 	"crypto/elliptic"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common/math"
+	"github.com/blockcypher/go-ethereum/common/math"
 )
 
 // This code is from https://github.com/ThePiachu/GoBit and implements

@@ -21,11 +21,11 @@ import (
 	"os"
 	"runtime/debug"
 
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/stateless"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/blockcypher/go-ethereum/core"
+	"github.com/blockcypher/go-ethereum/core/stateless"
+	"github.com/blockcypher/go-ethereum/core/types"
+	"github.com/blockcypher/go-ethereum/core/vm"
+	"github.com/blockcypher/go-ethereum/rlp"
 )
 
 // Payload represents the input data for stateless execution containing

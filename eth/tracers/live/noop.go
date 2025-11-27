@@ -20,11 +20,11 @@ import (
 	"encoding/json"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/tracing"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/eth/tracers"
-	"github.com/ethereum/go-ethereum/params"
+	"github.com/blockcypher/go-ethereum/common"
+	"github.com/blockcypher/go-ethereum/core/tracing"
+	"github.com/blockcypher/go-ethereum/core/types"
+	"github.com/blockcypher/go-ethereum/eth/tracers"
+	"github.com/blockcypher/go-ethereum/params"
 )
 
 func init() {

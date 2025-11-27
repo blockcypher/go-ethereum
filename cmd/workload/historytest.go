@@ -22,9 +22,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/internal/utesting"
+	"github.com/blockcypher/go-ethereum/common"
+	"github.com/blockcypher/go-ethereum/common/hexutil"
+	"github.com/blockcypher/go-ethereum/internal/utesting"
 )
 
 // historyTest is the content of a history test.

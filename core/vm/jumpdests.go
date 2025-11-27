@@ -16,7 +16,7 @@
 
 package vm
 
-import "github.com/ethereum/go-ethereum/common"
+import "github.com/blockcypher/go-ethereum/common"
 
 // JumpDestCache represents the cache of jumpdest analysis results.
 type JumpDestCache interface {

@@ -28,8 +28,8 @@ import (
 	"net/netip"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/p2p/enr"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/blockcypher/go-ethereum/p2p/enr"
+	"github.com/blockcypher/go-ethereum/rlp"
 )
 
 var errMissingPrefix = errors.New("missing 'enr:' prefix for base64-encoded record")

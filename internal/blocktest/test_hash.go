@@ -26,7 +26,7 @@ import (
 	"bytes"
 	"hash"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/blockcypher/go-ethereum/common"
 	"golang.org/x/crypto/sha3"
 )
 

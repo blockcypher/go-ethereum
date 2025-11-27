@@ -20,9 +20,9 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/triedb/hashdb"
+	"github.com/blockcypher/go-ethereum/common"
+	"github.com/blockcypher/go-ethereum/core/rawdb"
+	"github.com/blockcypher/go-ethereum/triedb/hashdb"
 )
 
 // TestDatabasePreimages tests the preimage functionality of the trie database.

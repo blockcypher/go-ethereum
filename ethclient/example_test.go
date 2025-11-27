@@ -17,7 +17,7 @@
 package ethclient_test
 
 import (
-	"github.com/ethereum/go-ethereum/node"
+	"github.com/blockcypher/go-ethereum/node"
 )
 
 var exampleNode *node.Node

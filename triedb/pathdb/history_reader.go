@@ -24,9 +24,9 @@ import (
 	"math"
 	"sort"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/blockcypher/go-ethereum/common"
+	"github.com/blockcypher/go-ethereum/core/rawdb"
+	"github.com/blockcypher/go-ethereum/ethdb"
 )
 
 // indexReaderWithLimitTag is a wrapper around indexReader that includes an

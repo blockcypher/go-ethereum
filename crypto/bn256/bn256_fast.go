@@ -9,7 +9,7 @@
 package bn256
 
 import (
-	gnark "github.com/ethereum/go-ethereum/crypto/bn256/gnark"
+	gnark "github.com/blockcypher/go-ethereum/crypto/bn256/gnark"
 )
 
 // G1 is an abstract cyclic group. The zero value is suitable for use as the

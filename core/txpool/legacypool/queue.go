@@ -20,11 +20,11 @@ import (
 	"sort"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/txpool"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/blockcypher/go-ethereum/common"
+	"github.com/blockcypher/go-ethereum/core/state"
+	"github.com/blockcypher/go-ethereum/core/txpool"
+	"github.com/blockcypher/go-ethereum/core/types"
+	"github.com/blockcypher/go-ethereum/log"
 )
 
 // queue manages nonce-gapped transactions that have been validated but are

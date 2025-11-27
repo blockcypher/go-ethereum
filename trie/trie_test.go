@@ -31,14 +31,14 @@ import (
 	"testing/quick"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/internal/testrand"
-	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/trie/trienode"
+	"github.com/blockcypher/go-ethereum/common"
+	"github.com/blockcypher/go-ethereum/core/rawdb"
+	"github.com/blockcypher/go-ethereum/core/types"
+	"github.com/blockcypher/go-ethereum/crypto"
+	"github.com/blockcypher/go-ethereum/ethdb"
+	"github.com/blockcypher/go-ethereum/internal/testrand"
+	"github.com/blockcypher/go-ethereum/rlp"
+	"github.com/blockcypher/go-ethereum/trie/trienode"
 	"github.com/holiman/uint256"
 	"golang.org/x/crypto/sha3"
 )
@@ -1502,7 +1502,7 @@ func testTrieCopyNewTrie(t *testing.T, entries []kv) {
 
 // goos: darwin
 // goarch: arm64
-// pkg: github.com/ethereum/go-ethereum/trie
+// pkg: github.com/blockcypher/go-ethereum/trie
 // cpu: Apple M1 Pro
 // BenchmarkTriePrefetch
 // BenchmarkTriePrefetch-8   	    9961	    100706 ns/op
@@ -1541,7 +1541,7 @@ func BenchmarkTriePrefetch(b *testing.B) {
 
 // goos: darwin
 // goarch: arm64
-// pkg: github.com/ethereum/go-ethereum/trie
+// pkg: github.com/blockcypher/go-ethereum/trie
 // cpu: Apple M1 Pro
 // BenchmarkTrieSeqPrefetch
 // BenchmarkTrieSeqPrefetch-8   	   12879	     96710 ns/op

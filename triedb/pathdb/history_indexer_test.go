@@ -20,7 +20,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/core/rawdb"
+	"github.com/blockcypher/go-ethereum/core/rawdb"
 )
 
 // TestHistoryIndexerShortenDeadlock tests that a call to shorten does not

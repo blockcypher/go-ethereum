@@ -21,15 +21,15 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/ethereum/go-ethereum/beacon/engine"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/stateless"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/params/forks"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/blockcypher/go-ethereum/beacon/engine"
+	"github.com/blockcypher/go-ethereum/common"
+	"github.com/blockcypher/go-ethereum/common/hexutil"
+	"github.com/blockcypher/go-ethereum/core"
+	"github.com/blockcypher/go-ethereum/core/stateless"
+	"github.com/blockcypher/go-ethereum/core/vm"
+	"github.com/blockcypher/go-ethereum/log"
+	"github.com/blockcypher/go-ethereum/params/forks"
+	"github.com/blockcypher/go-ethereum/rlp"
 )
 
 // ForkchoiceUpdatedWithWitnessV1 is analogous to ForkchoiceUpdatedV1, only it

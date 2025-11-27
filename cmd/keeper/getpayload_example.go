@@ -23,11 +23,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/core/stateless"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/blockcypher/go-ethereum/common/hexutil"
+	"github.com/blockcypher/go-ethereum/core/stateless"
+	"github.com/blockcypher/go-ethereum/core/types"
+	"github.com/blockcypher/go-ethereum/params"
+	"github.com/blockcypher/go-ethereum/rlp"
 )
 
 // ExtWitness is a witness RLP encoding for transferring across clients.

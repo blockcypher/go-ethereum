@@ -19,13 +19,13 @@ package bintrie
 import (
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/triedb"
-	"github.com/ethereum/go-ethereum/triedb/hashdb"
-	"github.com/ethereum/go-ethereum/triedb/pathdb"
+	"github.com/blockcypher/go-ethereum/common"
+	"github.com/blockcypher/go-ethereum/core/rawdb"
+	"github.com/blockcypher/go-ethereum/core/types"
+	"github.com/blockcypher/go-ethereum/ethdb"
+	"github.com/blockcypher/go-ethereum/triedb"
+	"github.com/blockcypher/go-ethereum/triedb/hashdb"
+	"github.com/blockcypher/go-ethereum/triedb/pathdb"
 	"github.com/holiman/uint256"
 )
 

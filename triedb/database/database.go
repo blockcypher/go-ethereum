@@ -17,8 +17,8 @@
 package database
 
 import (
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/blockcypher/go-ethereum/common"
+	"github.com/blockcypher/go-ethereum/core/types"
 )
 
 // NodeReader wraps the Node method of a backing trie reader.

@@ -19,8 +19,8 @@ package rawdb
 import (
 	"testing"
 
-	"github.com/ethereum/go-ethereum/core/rawdb/ancienttest"
-	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/blockcypher/go-ethereum/core/rawdb/ancienttest"
+	"github.com/blockcypher/go-ethereum/ethdb"
 )
 
 func TestMemoryFreezer(t *testing.T) {

@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/consensys/gnark-crypto/ecc/bn254"
-	"github.com/ethereum/go-ethereum/common/bitutil"
+	"github.com/blockcypher/go-ethereum/common/bitutil"
 )
 
 // G2 is the affine representation of a G2 group element.

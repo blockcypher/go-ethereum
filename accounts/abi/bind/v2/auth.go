@@ -22,12 +22,12 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/accounts/external"
-	"github.com/ethereum/go-ethereum/accounts/keystore"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/blockcypher/go-ethereum/accounts"
+	"github.com/blockcypher/go-ethereum/accounts/external"
+	"github.com/blockcypher/go-ethereum/accounts/keystore"
+	"github.com/blockcypher/go-ethereum/common"
+	"github.com/blockcypher/go-ethereum/core/types"
+	"github.com/blockcypher/go-ethereum/crypto"
 )
 
 // ErrNotAuthorized is returned when an account is not properly unlocked.

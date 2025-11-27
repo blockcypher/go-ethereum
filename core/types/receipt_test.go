@@ -25,9 +25,9 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/blockcypher/go-ethereum/common"
+	"github.com/blockcypher/go-ethereum/params"
+	"github.com/blockcypher/go-ethereum/rlp"
 	"github.com/holiman/uint256"
 	"github.com/kylelemons/godebug/diff"
 )
