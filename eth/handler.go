@@ -450,10 +450,12 @@ func (h *handler) Start(maxPeers int) {
 	h.txsSub = h.txpool.SubscribeTransactions(h.txsCh, false)
 	go h.txBroadcastLoop()
 
-	// broadcast block range
-	h.wg.Add(1)
+	// broadcast block range (only if chain supports subscriptions)
 	h.blockRange = newBlockRangeState(h.chain, h.eventMux)
-	go h.blockRangeLoop(h.blockRange)
+	if h.blockRange != nil {
+		h.wg.Add(1)
+		go h.blockRangeLoop(h.blockRange)
+	}
 
 	// start sync handlers
 	h.txFetcher.Start()
@@ -465,7 +467,9 @@ func (h *handler) Start(maxPeers int) {
 
 func (h *handler) Stop() {
 	h.txsSub.Unsubscribe() // quits txBroadcastLoop
-	h.blockRange.stop()
+	if h.blockRange != nil {
+		h.blockRange.stop()
+	}
 	h.txFetcher.Stop()
 	h.downloader.Terminate()
 
@@ -582,6 +586,11 @@ type blockRangeState struct {
 func newBlockRangeState(chain eth.HandlerBlockchain, typeMux *event.TypeMux) *blockRangeState {
 	headCh := make(chan core.ChainHeadEvent, chainHeadChanSize)
 	headSub := chain.SubscribeChainHeadEvent(headCh)
+	// If the chain doesn't support subscriptions (e.g., custom implementations),
+	// headSub will be nil and block range broadcasting will be disabled.
+	if headSub == nil {
+		return nil
+	}
 	syncSub := typeMux.Subscribe(downloader.StartEvent{}, downloader.DoneEvent{}, downloader.FailedEvent{})
 	st := &blockRangeState{
 		headCh:  headCh,
