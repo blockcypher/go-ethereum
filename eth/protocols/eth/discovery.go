@@ -19,9 +19,20 @@ package eth
 import (
 	"github.com/blockcypher/go-ethereum/core"
 	"github.com/blockcypher/go-ethereum/core/forkid"
+	"github.com/blockcypher/go-ethereum/core/types"
+	"github.com/blockcypher/go-ethereum/event"
 	"github.com/blockcypher/go-ethereum/p2p/enode"
+	"github.com/blockcypher/go-ethereum/params"
 	"github.com/blockcypher/go-ethereum/rlp"
 )
+
+// ENRUpdaterChain defines the blockchain methods needed for ENR updates.
+type ENRUpdaterChain interface {
+	SubscribeChainHeadEvent(ch chan<- core.ChainHeadEvent) event.Subscription
+	Config() *params.ChainConfig
+	Genesis() *types.Block
+	CurrentHeader() *types.Header
+}
 
 // enrEntry is the ENR entry which advertises `eth` protocol on the discovery.
 type enrEntry struct {
@@ -38,7 +49,7 @@ func (e enrEntry) ENRKey() string {
 
 // StartENRUpdater starts the `eth` ENR updater loop, which listens for chain
 // head events and updates the requested node record whenever a fork is passed.
-func StartENRUpdater(chain *core.BlockChain, ln *enode.LocalNode) {
+func StartENRUpdater(chain ENRUpdaterChain, ln *enode.LocalNode) {
 	var newHead = make(chan core.ChainHeadEvent, 10)
 	sub := chain.SubscribeChainHeadEvent(newHead)
 
@@ -59,7 +70,7 @@ func StartENRUpdater(chain *core.BlockChain, ln *enode.LocalNode) {
 }
 
 // currentENREntry constructs an `eth` ENR entry based on the current state of the chain.
-func currentENREntry(chain *core.BlockChain) *enrEntry {
+func currentENREntry(chain ENRUpdaterChain) *enrEntry {
 	head := chain.CurrentHeader()
 	return &enrEntry{
 		ForkID: forkid.NewID(chain.Config(), chain.Genesis(), head.Number.Uint64(), head.Time),
@@ -68,7 +79,7 @@ func currentENREntry(chain *core.BlockChain) *enrEntry {
 
 // NewNodeFilter returns a filtering function that returns whether the provided
 // enode advertises a forkid compatible with the current chain.
-func NewNodeFilter(chain *core.BlockChain) func(*enode.Node) bool {
+func NewNodeFilter(chain forkid.Blockchain) func(*enode.Node) bool {
 	filter := forkid.NewFilter(chain)
 	return func(n *enode.Node) bool {
 		var entry enrEntry

@@ -1917,8 +1917,8 @@ func (bc *BlockChain) insertChain(chain types.Blocks, setHead bool, makeWitness 
 		}
 		// Report the import stats before returning the various results
 		stats.processed++
-		stats.usedGas += res.usedGas
-		witness = res.witness
+		stats.usedGas += res.UsedGas
+		witness = res.Witness
 
 		var snapDiffItems, snapBufItems common.StorageSize
 		if bc.snaps != nil {
@@ -1933,10 +1933,10 @@ func (bc *BlockChain) insertChain(chain types.Blocks, setHead bool, makeWitness 
 		if !setHead {
 			// After merge we expect few side chains. Simply count
 			// all blocks the CL gives us for GC processing time
-			bc.gcproc += res.procTime
+			bc.gcproc += res.ProcTime
 			return witness, it.index, nil // Direct block insertion of a single block
 		}
-		switch res.status {
+		switch res.Status {
 		case CanonStatTy:
 			log.Debug("Inserted new block", "number", block.Number(), "hash", block.Hash(),
 				"uncles", len(block.Uncles()), "txs", len(block.Transactions()), "gas", block.GasUsed(),
@@ -1946,7 +1946,7 @@ func (bc *BlockChain) insertChain(chain types.Blocks, setHead bool, makeWitness 
 			lastCanon = block
 
 			// Only count canonical blocks for GC processing time
-			bc.gcproc += res.procTime
+			bc.gcproc += res.ProcTime
 
 		case SideStatTy:
 			log.Debug("Inserted forked block", "number", block.Number(), "hash", block.Hash(),
@@ -1968,22 +1968,22 @@ func (bc *BlockChain) insertChain(chain types.Blocks, setHead bool, makeWitness 
 	return witness, it.index, err
 }
 
-// blockProcessingResult is a summary of block processing
+// BlockProcessingResult is a summary of block processing
 // used for updating the stats.
-type blockProcessingResult struct {
-	usedGas  uint64
-	procTime time.Duration
-	status   WriteStatus
-	witness  *stateless.Witness
+type BlockProcessingResult struct {
+	UsedGas  uint64
+	ProcTime time.Duration
+	Status   WriteStatus
+	Witness  *stateless.Witness
 }
 
-func (bpr *blockProcessingResult) Witness() *stateless.Witness {
-	return bpr.witness
+func (bpr *BlockProcessingResult) GetWitness() *stateless.Witness {
+	return bpr.Witness
 }
 
 // ProcessBlock executes and validates the given block. If there was no error
 // it writes the block and associated state to database.
-func (bc *BlockChain) ProcessBlock(parentRoot common.Hash, block *types.Block, setHead bool, makeWitness bool) (_ *blockProcessingResult, blockEndErr error) {
+func (bc *BlockChain) ProcessBlock(parentRoot common.Hash, block *types.Block, setHead bool, makeWitness bool) (_ *BlockProcessingResult, blockEndErr error) {
 	var (
 		err       error
 		startTime = time.Now()
@@ -2178,11 +2178,11 @@ func (bc *BlockChain) ProcessBlock(parentRoot common.Hash, block *types.Block, s
 	mgasps := float64(res.GasUsed) * 1000 / float64(elapsed)
 	chainMgaspsMeter.Update(time.Duration(mgasps))
 
-	return &blockProcessingResult{
-		usedGas:  res.GasUsed,
-		procTime: proctime,
-		status:   status,
-		witness:  witness,
+	return &BlockProcessingResult{
+		UsedGas:  res.GasUsed,
+		ProcTime: proctime,
+		Status:   status,
+		Witness:  witness,
 	}, nil
 }
 

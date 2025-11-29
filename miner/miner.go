@@ -26,17 +26,17 @@ import (
 	"github.com/blockcypher/go-ethereum/common"
 	"github.com/blockcypher/go-ethereum/common/hexutil"
 	"github.com/blockcypher/go-ethereum/consensus"
-	"github.com/blockcypher/go-ethereum/core"
 	"github.com/blockcypher/go-ethereum/core/state"
 	"github.com/blockcypher/go-ethereum/core/txpool"
 	"github.com/blockcypher/go-ethereum/core/types"
+	eth "github.com/blockcypher/go-ethereum/eth/protocols/eth"
 	"github.com/blockcypher/go-ethereum/params"
 )
 
 // Backend wraps all methods required for mining. Only full node is capable
 // to offer all the functions here.
 type Backend interface {
-	BlockChain() *core.BlockChain
+	BlockChain() eth.HandlerBlockchain
 	TxPool() *txpool.TxPool
 }
 
@@ -71,7 +71,7 @@ type Miner struct {
 	engine      consensus.Engine
 	txpool      *txpool.TxPool
 	prio        []common.Address // A list of senders to prioritize
-	chain       *core.BlockChain
+	chain       eth.HandlerBlockchain
 	pending     *pending
 	pendingMu   sync.Mutex // Lock protects the pending block
 }

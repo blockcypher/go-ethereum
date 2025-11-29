@@ -95,7 +95,7 @@ type Ethereum struct {
 	txPool         *txpool.TxPool
 	blobTxPool     *blobpool.BlobPool
 	localTxTracker *locals.TxTracker
-	blockchain     *core.BlockChain
+	blockchain     eth.HandlerBlockchain
 
 	handler *handler
 	discmix *enode.FairMix
@@ -133,6 +133,7 @@ func NewMin(handler *handler, chainDb ethdb.Database, networkID uint64, bc eth.H
 	conf.SyncMode = downloader.FullSync
 	conf.SnapshotCache = 0
 	ethereum := Ethereum{
+		blockchain: bc,
 		config:    &conf,
 		handler:   handler,
 		networkID: networkID,
@@ -342,7 +343,7 @@ func New(stack *node.Node, config *ethconfig.Config) (*Ethereum, error) {
 
 	// Permit the downloader to use the trie cache allowance during fast sync
 	cacheLimit := options.TrieCleanLimit + options.TrieDirtyLimit + options.SnapshotLimit
-	if eth.handler, err = newHandler(&handlerConfig{
+	if eth.handler, err = NewHandler(&HandlerConfig{
 		NodeID:         eth.p2pServer.Self().ID(),
 		Database:       chainDb,
 		Chain:          eth.blockchain,
@@ -431,8 +432,8 @@ func (s *Ethereum) ResetWithGenesisBlock(gb *types.Block) {
 
 func (s *Ethereum) Miner() *miner.Miner { return s.miner }
 
-func (s *Ethereum) AccountManager() *accounts.Manager  { return s.accountManager }
-func (s *Ethereum) BlockChain() *core.BlockChain       { return s.blockchain }
+func (s *Ethereum) AccountManager() *accounts.Manager      { return s.accountManager }
+func (s *Ethereum) BlockChain() eth.HandlerBlockchain      { return s.blockchain }
 func (s *Ethereum) TxPool() *txpool.TxPool             { return s.txPool }
 func (s *Ethereum) BlobTxPool() *blobpool.BlobPool     { return s.blobTxPool }
 func (s *Ethereum) Engine() consensus.Engine           { return s.engine }

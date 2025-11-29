@@ -27,12 +27,18 @@ import (
 	"github.com/blockcypher/go-ethereum/rpc"
 )
 
+// DownloaderAPIChain defines the blockchain methods needed by DownloaderAPI.
+type DownloaderAPIChain interface {
+	TxIndexProgress() (core.TxIndexProgress, error)
+	StateIndexProgress() (uint64, error)
+}
+
 // DownloaderAPI provides an API which gives information about the current
 // synchronisation status. It offers only methods that operates on data that
 // can be available to anyone without security risks.
 type DownloaderAPI struct {
 	d                         *Downloader
-	chain                     *core.BlockChain
+	chain                     DownloaderAPIChain
 	mux                       *event.TypeMux
 	installSyncSubscription   chan chan interface{}
 	uninstallSyncSubscription chan *uninstallSyncSubscriptionRequest
@@ -42,7 +48,7 @@ type DownloaderAPI struct {
 // listens for events from the downloader through the global event mux. In case it receives one of
 // these events it broadcasts it to all syncing subscriptions that are installed through the
 // installSyncSubscription channel.
-func NewDownloaderAPI(d *Downloader, chain *core.BlockChain, m *event.TypeMux) *DownloaderAPI {
+func NewDownloaderAPI(d *Downloader, chain DownloaderAPIChain, m *event.TypeMux) *DownloaderAPI {
 	api := &DownloaderAPI{
 		d:                         d,
 		chain:                     chain,

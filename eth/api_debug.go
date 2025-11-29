@@ -510,7 +510,7 @@ func (api *DebugAPI) ExecutionWitness(bn rpc.BlockNumber) (*stateless.ExtWitness
 		return nil, err
 	}
 
-	return result.Witness().ToExtWitness(), nil
+	return result.GetWitness().ToExtWitness(), nil
 }
 
 func (api *DebugAPI) ExecutionWitnessByHash(hash common.Hash) (*stateless.ExtWitness, error) {
@@ -530,5 +530,5 @@ func (api *DebugAPI) ExecutionWitnessByHash(hash common.Hash) (*stateless.ExtWit
 		return nil, err
 	}
 
-	return result.Witness().ToExtWitness(), nil
+	return result.GetWitness().ToExtWitness(), nil
 }

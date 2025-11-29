@@ -24,10 +24,15 @@ import (
 	"os"
 	"strings"
 
+	"github.com/blockcypher/go-ethereum/common"
 	"github.com/blockcypher/go-ethereum/core/types"
-	"github.com/blockcypher/go-ethereum/core"
 	"github.com/blockcypher/go-ethereum/rlp"
 )
+
+// blockChecker is used to check if blocks exist in the chain.
+type blockChecker interface {
+	HasBlock(hash common.Hash, number uint64) bool
+}
 
 // AdminAPI is the collection of Ethereum full node related APIs for node
 // administration.
@@ -79,7 +84,7 @@ func (api *AdminAPI) ExportChain(file string, first *uint64, last *uint64) (bool
 	return true, nil
 }
 
-func hasAllBlocks(chain *core.BlockChain, bs []*types.Block) bool {
+func hasAllBlocks(chain blockChecker, bs []*types.Block) bool {
 	for _, b := range bs {
 		if !chain.HasBlock(b.Hash(), b.NumberU64()) {
 			return false

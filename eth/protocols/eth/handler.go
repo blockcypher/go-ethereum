@@ -121,7 +121,11 @@ type HandlerBlockchain interface {
 	SubscribeChainEvent(ch chan<- core.ChainEvent) event.Subscription
 	SubscribeRemovedLogsEvent(ch chan<- core.RemovedLogsEvent) event.Subscription
 	SubscribeLogsEvent(ch chan<- []*types.Log) event.Subscription
-    TxIndexProgress() (core.TxIndexProgress, error)
+	TxIndexProgress() (core.TxIndexProgress, error)
+	GetBlockNumber(hash common.Hash) *uint64
+	GetCanonicalReceipt(tx *types.Transaction, blockHash common.Hash, blockNumber, txIndex uint64) (*types.Receipt, error)
+	TxIndexDone() bool
+	GetRawReceipts(hash common.Hash, number uint64) types.Receipts
 
 	// required for eth/backend.go
 	Export(w io.Writer) error
@@ -149,6 +153,11 @@ type HandlerBlockchain interface {
 	// required by eth/api_debug.go
 	GetTrieFlushInterval() time.Duration
 	HistoryPruningCutoff() (uint64, common.Hash)
+	StateSizer() *state.SizeTracker
+	ProcessBlock(parentRoot common.Hash, block *types.Block, setHead bool, makeWitness bool) (*core.BlockProcessingResult, error)
+
+	// required by eth/state_accessor.go
+	HistoricState(root common.Hash) (*state.StateDB, error)
 }
 
 // Handler is a callback to invoke from an outside runner after the boilerplate
