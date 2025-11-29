@@ -277,7 +277,11 @@ func (h *handler) runEthPeer(peer *eth.Peer, handler eth.Handler) error {
 	}
 
 	// Execute the Ethereum handshake
-	if err := peer.Handshake(h.networkID, h.chain, h.blockRange.currentRange()); err != nil {
+	var blockRange eth.BlockRangeUpdatePacket
+	if h.blockRange != nil {
+		blockRange = h.blockRange.currentRange()
+	}
+	if err := peer.Handshake(h.networkID, h.chain, blockRange); err != nil {
 		peer.Log().Debug("Ethereum handshake failed", "err", err)
 		return err
 	}
