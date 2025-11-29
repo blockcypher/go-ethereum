@@ -20,7 +20,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/blockcypher/go-ethereum/core"
 	"github.com/blockcypher/go-ethereum/core/types"
 	"github.com/blockcypher/go-ethereum/eth/protocols/eth"
 	"github.com/blockcypher/go-ethereum/p2p/enode"
@@ -30,7 +29,7 @@ import (
 // packets that are sent as replies or broadcasts.
 type ethHandler handler
 
-func (h *ethHandler) Chain() *core.BlockChain { return h.chain }
+func (h *ethHandler) Chain() eth.HandlerBlockchain { return h.chain }
 func (h *ethHandler) TxPool() eth.TxPool           { return h.txpool }
 
 // RunPeer is invoked when a peer joins on the `eth` protocol.

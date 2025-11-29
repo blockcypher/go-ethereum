@@ -158,6 +158,10 @@ type HandlerBlockchain interface {
 
 	// required by eth/state_accessor.go
 	HistoricState(root common.Hash) (*state.StateDB, error)
+
+	// required by eth/downloader
+	InterruptInsert(on bool)
+	InsertHeadersBeforeCutoff([]*types.Header) (int, error)
 }
 
 // Handler is a callback to invoke from an outside runner after the boilerplate
@@ -168,7 +172,7 @@ type Handler func(peer *Peer) error
 // callback methods to invoke on remote deliveries.
 type Backend interface {
 	// Chain retrieves the blockchain object to serve data.
-	Chain() *core.BlockChain
+	Chain() HandlerBlockchain
 
 	// TxPool retrieves the transaction pool object to serve data.
 	TxPool() TxPool
@@ -245,7 +249,7 @@ type NodeInfo struct {
 }
 
 // nodeInfo retrieves some `eth` protocol metadata about the running host node.
-func nodeInfo(chain *core.BlockChain, network uint64) *NodeInfo {
+func nodeInfo(chain HandlerBlockchain, network uint64) *NodeInfo {
 	head := chain.CurrentBlock()
 	hash := head.Hash()
 

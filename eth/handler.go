@@ -108,18 +108,6 @@ type HandlerConfig struct {
 	RequiredBlocks map[uint64]common.Hash // Hard coded map of required block hashes for sync challenges
 }
 
-// handlerConfig is the internal configuration that requires *core.BlockChain.
-type handlerConfig struct {
-	NodeID         enode.ID               // P2P node ID used for tx propagation topology
-	Database       ethdb.Database         // Database for direct sync insertions
-	Chain          *core.BlockChain       // Blockchain to serve data from
-	TxPool         txPool                 // Transaction pool to propagate from
-	Network        uint64                 // Network identifier to advertise
-	Sync           ethconfig.SyncMode     // Whether to snap or full sync
-	BloomCache     uint64                 // Megabytes to alloc for snap sync bloom
-	EventMux       *event.TypeMux         // Legacy event mux, deprecate for `feed`
-	RequiredBlocks map[uint64]common.Hash // Hard coded map of required block hashes for sync challenges
-}
 
 type Handler handler
 
@@ -144,7 +132,7 @@ type handler struct {
 
 	database ethdb.Database
 	txpool   txPool
-	chain    *core.BlockChain
+	chain    eth.HandlerBlockchain
 	maxPeers int
 
 	downloader     *downloader.Downloader
@@ -168,52 +156,8 @@ type handler struct {
 	handlerDoneCh  chan struct{}
 }
 
+// NewHandler returns a handler for all Ethereum chain management protocol.
 func NewHandler(config *HandlerConfig) (*handler, error) {
-	// Try to get *core.BlockChain from the interface
-	chain, ok := config.Chain.(*core.BlockChain)
-	if !ok {
-		// For custom implementations, we need the handler to work without *core.BlockChain
-		// This is used by external projects like prpl that implement their own chain
-		return newHandlerWithInterface(config)
-	}
-	conf := handlerConfig{
-		NodeID:         config.NodeID,
-		Database:       config.Database,
-		Chain:          chain,
-		TxPool:         config.TxPool,
-		Network:        config.Network,
-		Sync:           config.Sync,
-		BloomCache:     config.BloomCache,
-		EventMux:       config.EventMux,
-		RequiredBlocks: config.RequiredBlocks,
-	}
-	return newHandler(&conf)
-}
-
-// newHandlerWithInterface creates a handler that works with a HandlerBlockchain interface.
-// This is used by external projects that implement custom blockchain backends.
-func newHandlerWithInterface(config *HandlerConfig) (*handler, error) {
-	// For now, we'll create a minimal handler that doesn't fully support all features
-	// but allows P2P networking to work
-	if config.EventMux == nil {
-		config.EventMux = new(event.TypeMux)
-	}
-	h := &handler{
-		nodeID:         config.NodeID,
-		networkID:      config.Network,
-		eventMux:       config.EventMux,
-		database:       config.Database,
-		txpool:         config.TxPool,
-		chain:          nil, // Custom implementations don't have *core.BlockChain
-		peers:          newPeerSet(),
-		txBroadcastKey: newBroadcastChoiceKey(),
-		requiredBlocks: config.RequiredBlocks,
-	}
-	return h, nil
-}
-
-// newHandler returns a handler for all Ethereum chain management protocol.
-func newHandler(config *handlerConfig) (*handler, error) {
 	// Create the protocol manager with the base fields
 	if config.EventMux == nil {
 		config.EventMux = new(event.TypeMux) // Nicety initialization for tests
@@ -635,7 +579,7 @@ type blockRangeState struct {
 	syncSub *event.TypeMuxSubscription
 }
 
-func newBlockRangeState(chain *core.BlockChain, typeMux *event.TypeMux) *blockRangeState {
+func newBlockRangeState(chain eth.HandlerBlockchain, typeMux *event.TypeMux) *blockRangeState {
 	headCh := make(chan core.ChainHeadEvent, chainHeadChanSize)
 	headSub := chain.SubscribeChainHeadEvent(headCh)
 	syncSub := typeMux.Subscribe(downloader.StartEvent{}, downloader.DoneEvent{}, downloader.FailedEvent{})
@@ -722,7 +666,7 @@ func (h *handler) broadcastBlockRange(state *blockRangeState) {
 }
 
 // update assigns the values of the next block range update from the chain.
-func (st *blockRangeState) update(chain *core.BlockChain, latest *types.Header) {
+func (st *blockRangeState) update(chain eth.HandlerBlockchain, latest *types.Header) {
 	earliest, _ := chain.HistoryPruningCutoff()
 	st.next.Store(&eth.BlockRangeUpdatePacket{
 		EarliestBlock:   min(latest.Number.Uint64(), earliest),
