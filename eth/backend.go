@@ -138,6 +138,7 @@ func NewMin(handler *handler, chainDb ethdb.Database, networkID uint64, bc eth.H
 		handler:   handler,
 		networkID: networkID,
 		chainDb:   chainDb,
+		discmix:   enode.NewFairMix(discmixTimeout),
 	}
 	ethereum.APIBackend = &EthAPIBackend{eth: &ethereum}
 	return &ethereum
