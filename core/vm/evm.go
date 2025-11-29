@@ -600,7 +600,7 @@ func (evm *EVM) create(caller common.Address, code []byte, gas uint64, value *ui
 	evm.Context.Transfer(evm.StateDB, caller, address, value)
 
 	if evm.listener != nil && evm.depth > 0 {
-		evm.listener.RegisterCreate(nonce, evm.GasPrice, gas, caller.Address(), address, value.ToBig(), codeAndHash.code, uint64(evm.depth))
+		evm.listener.RegisterCreate(nonce, evm.GasPrice, gas, caller, address, value.ToBig(), code, uint64(evm.depth))
 	}
 
 	// Initialise a new contract and set the code that is to be used by the EVM.

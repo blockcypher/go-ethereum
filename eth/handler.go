@@ -94,14 +94,25 @@ type txPool interface {
 	SubscribeTransactions(ch chan<- core.NewTxsEvent, reorgs bool) event.Subscription
 }
 
-type HandlerConfig handlerConfig
+// HandlerConfig is the exported configuration for creating a Handler.
+// Chain can be either *core.BlockChain or an eth.HandlerBlockchain implementation.
+type HandlerConfig struct {
+	NodeID         enode.ID               // P2P node ID used for tx propagation topology
+	Database       ethdb.Database         // Database for direct sync insertions
+	Chain          eth.HandlerBlockchain  // Blockchain to serve data from (can be *core.BlockChain or custom implementation)
+	TxPool         txPool                 // Transaction pool to propagate from
+	Network        uint64                 // Network identifier to advertise
+	Sync           ethconfig.SyncMode     // Whether to snap or full sync
+	BloomCache     uint64                 // Megabytes to alloc for snap sync bloom
+	EventMux       *event.TypeMux         // Legacy event mux, deprecate for `feed`
+	RequiredBlocks map[uint64]common.Hash // Hard coded map of required block hashes for sync challenges
+}
 
-// handlerConfig is the collection of initialization parameters to create a full
-// node network handler.
+// handlerConfig is the internal configuration that requires *core.BlockChain.
 type handlerConfig struct {
 	NodeID         enode.ID               // P2P node ID used for tx propagation topology
 	Database       ethdb.Database         // Database for direct sync insertions
-	Chain          eth.HandlerBlockchain  // Blockchain to serve data from
+	Chain          *core.BlockChain       // Blockchain to serve data from
 	TxPool         txPool                 // Transaction pool to propagate from
 	Network        uint64                 // Network identifier to advertise
 	Sync           ethconfig.SyncMode     // Whether to snap or full sync
@@ -133,7 +144,7 @@ type handler struct {
 
 	database ethdb.Database
 	txpool   txPool
-	chain    eth.HandlerBlockchain
+	chain    *core.BlockChain
 	maxPeers int
 
 	downloader     *downloader.Downloader
@@ -158,8 +169,47 @@ type handler struct {
 }
 
 func NewHandler(config *HandlerConfig) (*handler, error) {
-	conf := handlerConfig(*config)
+	// Try to get *core.BlockChain from the interface
+	chain, ok := config.Chain.(*core.BlockChain)
+	if !ok {
+		// For custom implementations, we need the handler to work without *core.BlockChain
+		// This is used by external projects like prpl that implement their own chain
+		return newHandlerWithInterface(config)
+	}
+	conf := handlerConfig{
+		NodeID:         config.NodeID,
+		Database:       config.Database,
+		Chain:          chain,
+		TxPool:         config.TxPool,
+		Network:        config.Network,
+		Sync:           config.Sync,
+		BloomCache:     config.BloomCache,
+		EventMux:       config.EventMux,
+		RequiredBlocks: config.RequiredBlocks,
+	}
 	return newHandler(&conf)
+}
+
+// newHandlerWithInterface creates a handler that works with a HandlerBlockchain interface.
+// This is used by external projects that implement custom blockchain backends.
+func newHandlerWithInterface(config *HandlerConfig) (*handler, error) {
+	// For now, we'll create a minimal handler that doesn't fully support all features
+	// but allows P2P networking to work
+	if config.EventMux == nil {
+		config.EventMux = new(event.TypeMux)
+	}
+	h := &handler{
+		nodeID:         config.NodeID,
+		networkID:      config.Network,
+		eventMux:       config.EventMux,
+		database:       config.Database,
+		txpool:         config.TxPool,
+		chain:          nil, // Custom implementations don't have *core.BlockChain
+		peers:          newPeerSet(),
+		txBroadcastKey: newBroadcastChoiceKey(),
+		requiredBlocks: config.RequiredBlocks,
+	}
+	return h, nil
 }
 
 // newHandler returns a handler for all Ethereum chain management protocol.

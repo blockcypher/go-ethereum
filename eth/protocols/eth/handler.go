@@ -19,7 +19,6 @@ package eth
 import (
 	"fmt"
 	"io"
-	"math/big"
 	"time"
 
 	"github.com/blockcypher/go-ethereum/common"
@@ -28,6 +27,7 @@ import (
 	"github.com/blockcypher/go-ethereum/core/rawdb"
 	"github.com/blockcypher/go-ethereum/core/state"
 	"github.com/blockcypher/go-ethereum/core/state/snapshot"
+	"github.com/blockcypher/go-ethereum/core/stateless"
 	"github.com/blockcypher/go-ethereum/core/txpool"
 	"github.com/blockcypher/go-ethereum/core/types"
 	"github.com/blockcypher/go-ethereum/core/vm"
@@ -38,7 +38,7 @@ import (
 	"github.com/blockcypher/go-ethereum/p2p/enr"
 	"github.com/blockcypher/go-ethereum/params"
 	"github.com/blockcypher/go-ethereum/rlp"
-	"github.com/blockcypher/go-ethereum/trie"
+	"github.com/blockcypher/go-ethereum/triedb"
 )
 
 const (
@@ -72,15 +72,13 @@ type HandlerBlockchain interface {
 	HasFastBlock(hash common.Hash, number uint64) bool
 	GetBlock(hash common.Hash, number uint64) *types.Block
 	GetBlockByHash(hash common.Hash) *types.Block
-	StopInsert()
-	InsertBlockWithoutSetHead(block *types.Block) error
-	InsertReceiptChain(blockChain types.Blocks, receiptChain []types.Receipts, ancientLimit uint64) (int, error)
+	InsertBlockWithoutSetHead(block *types.Block, makeWitness bool) (*stateless.Witness, error)
+	InsertReceiptChain(blockChain types.Blocks, receiptChain []rlp.RawValue, ancientLimit uint64) (int, error)
 
 	InsertChain(chain types.Blocks) (int, error)
 
 	InsertHeaderChain([]*types.Header) (int, error)
 	CurrentHeader() *types.Header
-	GetTd(hash common.Hash, number uint64) *big.Int
 	GetHeader(hash common.Hash, number uint64) *types.Header
 	GetHeaderByHash(hash common.Hash) *types.Header
 	GetHeadersFrom(number, count uint64) []rlp.RawValue
@@ -102,15 +100,17 @@ type HandlerBlockchain interface {
 	// required by eth/handler.go
 	GetAncestor(hash common.Hash, number, ancestor uint64, maxNonCanonical *uint64) (common.Hash, uint64)
 	GetBodyRLP(hash common.Hash) rlp.RawValue
-	ContractCodeWithPrefix(hash common.Hash) ([]byte, error)
+	ContractCodeWithPrefix(hash common.Hash) []byte
 	GetReceiptsByHash(hash common.Hash) types.Receipts
-	TrieDB() *trie.Database
+	GetReceiptsRLP(hash common.Hash) rlp.RawValue
+	TrieDB() *triedb.Database
 	HasState(hash common.Hash) bool
 
 	// required for eth/handler_test.go
 	GetBlockByNumber(number uint64) *types.Block
 	GetCanonicalHash(number uint64) common.Hash
 	StateAt(root common.Hash) (*state.StateDB, error)
+	StateIndexProgress() (uint64, error)
 	Stop()
 
 	// required for eth/api_backend.go
@@ -121,7 +121,6 @@ type HandlerBlockchain interface {
 	SubscribeChainEvent(ch chan<- core.ChainEvent) event.Subscription
 	SubscribeRemovedLogsEvent(ch chan<- core.RemovedLogsEvent) event.Subscription
 	SubscribeLogsEvent(ch chan<- []*types.Log) event.Subscription
-	SubscribeChainSideEvent(ch chan<- core.ChainSideEvent) event.Subscription
     TxIndexProgress() (core.TxIndexProgress, error)
 
 	// required for eth/backend.go
@@ -142,14 +141,14 @@ type HandlerBlockchain interface {
 	HasBlockAndState(hash common.Hash, number uint64) bool
 
 	// required by miner/worker.go
-	WriteBlockAndSetHead(block *types.Block, receipts []*types.Receipt, logs []*types.Log, state *state.StateDB, emitHeadEvent bool) (status core.WriteStatus, err error)
 	GetBlocksFromHash(hash common.Hash, n int) (blocks []*types.Block)
 
 	// required by les
 	SubscribeBlockProcessingEvent(ch chan<- bool) event.Subscription
-	GetTransactionLookup(hash common.Hash) (*rawdb.LegacyTxLookupEntry, *types.Transaction, error)
+	GetCanonicalTransaction(hash common.Hash) (*rawdb.LegacyTxLookupEntry, *types.Transaction)
 	// required by eth/api_debug.go
 	GetTrieFlushInterval() time.Duration
+	HistoryPruningCutoff() (uint64, common.Hash)
 }
 
 // Handler is a callback to invoke from an outside runner after the boilerplate
@@ -160,7 +159,7 @@ type Handler func(peer *Peer) error
 // callback methods to invoke on remote deliveries.
 type Backend interface {
 	// Chain retrieves the blockchain object to serve data.
-	Chain() HandlerBlockchain
+	Chain() *core.BlockChain
 
 	// TxPool retrieves the transaction pool object to serve data.
 	TxPool() TxPool
@@ -237,7 +236,7 @@ type NodeInfo struct {
 }
 
 // nodeInfo retrieves some `eth` protocol metadata about the running host node.
-func nodeInfo(chain HandlerBlockchain, network uint64) *NodeInfo {
+func nodeInfo(chain *core.BlockChain, network uint64) *NodeInfo {
 	head := chain.CurrentBlock()
 	hash := head.Hash()
 

@@ -30,6 +30,7 @@ import (
 	"github.com/blockcypher/go-ethereum/beacon/engine"
 	"github.com/blockcypher/go-ethereum/common"
 	"github.com/blockcypher/go-ethereum/common/hexutil"
+	"github.com/blockcypher/go-ethereum/core/rawdb"
 	"github.com/blockcypher/go-ethereum/core/types"
 	"github.com/blockcypher/go-ethereum/eth"
 	"github.com/blockcypher/go-ethereum/eth/ethconfig"

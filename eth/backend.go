@@ -126,6 +126,22 @@ type Ethereum struct {
 	shutdownTracker *shutdowncheck.ShutdownTracker // Tracks if and when the node has shutdown ungracefully
 }
 
+// NewMin creates a minimal Ethereum instance for use with custom blockchain implementations.
+// This is useful for embedding go-ethereum's P2P networking with a custom chain backend.
+func NewMin(handler *handler, chainDb ethdb.Database, networkID uint64, bc eth.HandlerBlockchain, config *params.ChainConfig) *Ethereum {
+	conf := ethconfig.Defaults
+	conf.SyncMode = downloader.FullSync
+	conf.SnapshotCache = 0
+	ethereum := Ethereum{
+		config:    &conf,
+		handler:   handler,
+		networkID: networkID,
+		chainDb:   chainDb,
+	}
+	ethereum.APIBackend = &EthAPIBackend{eth: &ethereum}
+	return &ethereum
+}
+
 // New creates a new Ethereum object (including the initialisation of the common Ethereum object),
 // whose lifecycle will be managed by the provided node.
 func New(stack *node.Node, config *ethconfig.Config) (*Ethereum, error) {
@@ -416,7 +432,7 @@ func (s *Ethereum) ResetWithGenesisBlock(gb *types.Block) {
 func (s *Ethereum) Miner() *miner.Miner { return s.miner }
 
 func (s *Ethereum) AccountManager() *accounts.Manager  { return s.accountManager }
-func (s *Ethereum) BlockChain() eth.HandlerBlockchain  { return s.blockchain }
+func (s *Ethereum) BlockChain() *core.BlockChain       { return s.blockchain }
 func (s *Ethereum) TxPool() *txpool.TxPool             { return s.txPool }
 func (s *Ethereum) BlobTxPool() *blobpool.BlobPool     { return s.blobTxPool }
 func (s *Ethereum) Engine() consensus.Engine           { return s.engine }

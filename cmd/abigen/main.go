@@ -25,6 +25,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/blockcypher/go-ethereum/accounts/abi"
 	"github.com/blockcypher/go-ethereum/accounts/abi/abigen"
 	"github.com/blockcypher/go-ethereum/cmd/utils"
 	"github.com/blockcypher/go-ethereum/common/compiler"

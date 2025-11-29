@@ -30,13 +30,6 @@ import (
 	"github.com/blockcypher/go-ethereum/params"
 )
 
-type blockchain interface {
-	consensus.ChainReader
-
-	// Engine retrieves the chain's consensus engine.
-	Engine() consensus.Engine
-}
-
 // StateProcessor is a basic Processor, which takes care of transitioning
 // state from one point to another.
 //
@@ -187,7 +180,7 @@ func ApplyTransactionWithEVM(msg *Message, gp *GasPool, statedb *state.StateDB, 
 	}
 
 	itx.SetParentHash(tx.Hash())
-	receipt := MakeReceipt(evm, result, statedb, blockNumber, blockHash, blockTime, tx, *usedGas, root)
+	receipt = MakeReceipt(evm, result, statedb, blockNumber, blockHash, blockTime, tx, *usedGas, root)
 	if result.Err != nil {
 		return receipt, itx.InternalTransactions(), result.Err.Error(), nil
 	}

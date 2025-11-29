@@ -136,7 +136,7 @@ type dummyBackend struct {
 	chain *core.BlockChain
 }
 
-func (d *dummyBackend) Chain() eth.HandlerBlockchain           { return d.chain }
+func (d *dummyBackend) Chain() eth.*core.BlockChain           { return d.chain }
 func (d *dummyBackend) RunPeer(*Peer, Handler) error           { return nil }
 func (d *dummyBackend) PeerInfo(enode.ID) interface{}          { return "Foo" }
 func (d *dummyBackend) Handle(*Peer, Packet) error             { return nil }

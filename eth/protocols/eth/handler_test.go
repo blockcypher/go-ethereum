@@ -60,7 +60,7 @@ func u64(val uint64) *uint64 { return &val }
 // in the `eth` protocol without actually doing any data processing.
 type testBackend struct {
 	db     ethdb.Database
-	chain  HandlerBlockchain
+	chain  *core.BlockChain
 	txpool *txpool.TxPool
 }
 
@@ -151,7 +151,7 @@ func (b *testBackend) close() {
 	b.chain.Stop()
 }
 
-func (b *testBackend) Chain() HandlerBlockchain { return b.chain }
+func (b *testBackend) Chain() *core.BlockChain { return b.chain }
 func (b *testBackend) TxPool() TxPool           { return b.txpool }
 
 func (b *testBackend) RunPeer(peer *Peer, handler Handler) error {
