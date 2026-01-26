@@ -201,6 +201,7 @@ type backfiller interface {
 type skeleton struct {
 	db     ethdb.Database // Database backing the skeleton
 	filler backfiller     // Chain syncer suspended/resumed by head events
+	blockchain BlockChain
 
 	peers *peerSet                   // Set of peers we can sync from
 	idles map[string]*peerConnection // Set of idle peers in the current sync cycle
@@ -227,11 +228,12 @@ type skeleton struct {
 
 // newSkeleton creates a new sync skeleton that tracks a potentially dangling
 // header chain until it's linked into an existing set of blocks.
-func newSkeleton(db ethdb.Database, peers *peerSet, drop peerDropFn, filler backfiller) *skeleton {
+func newSkeleton(db ethdb.Database, peers *peerSet, drop peerDropFn, filler backfiller, blockchain BlockChain) *skeleton {
 	sk := &skeleton{
 		db:         db,
 		filler:     filler,
 		peers:      peers,
+		blockchain: blockchain,
 		drop:       drop,
 		requests:   make(map[uint64]*headerRequest),
 		headEvents: make(chan *headUpdate),
@@ -368,9 +370,7 @@ func (s *skeleton) sync(head *types.Header) (*types.Header, error) {
 	// If the sync is already done, resume the backfiller. When the loop stops,
 	// terminate the backfiller too.
 	linked := len(s.progress.Subchains) == 1 &&
-		rawdb.HasHeader(s.db, s.progress.Subchains[0].Next, s.scratchHead) &&
-		rawdb.HasBody(s.db, s.progress.Subchains[0].Next, s.scratchHead) &&
-		rawdb.HasReceipts(s.db, s.progress.Subchains[0].Next, s.scratchHead)
+		s.blockchain.HasBlock(s.progress.Subchains[0].Next, s.scratchHead)
 	if linked {
 		s.filler.resume()
 	}
@@ -982,9 +982,7 @@ func (s *skeleton) processResponse(res *headerResponse) (linked bool, merged boo
 				// processing is done, so it's just one more "needless" check.
 				//
 				// The weird cascading checks are done to minimize the database reads.
-				linked = rawdb.HasHeader(s.db, header.ParentHash, header.Number.Uint64()-1) &&
-					rawdb.HasBody(s.db, header.ParentHash, header.Number.Uint64()-1) &&
-					rawdb.HasReceipts(s.db, header.ParentHash, header.Number.Uint64()-1)
+				linked = s.blockchain.HasBlock(header.ParentHash, header.Number.Uint64()-1)
 				if linked {
 					break
 				}
