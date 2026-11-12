@@ -499,6 +499,10 @@ func (api *ConsensusAPI) GetBlobsV1(hashes []common.Hash) ([]*engine.BlobAndProo
 	if len(hashes) > 128 {
 		return nil, engine.TooLargeRequest.With(fmt.Errorf("requested blob count too large: %v", len(hashes)))
 	}
+	// Running without a blob pool (as bolt does): nothing to serve.
+	if api.eth.BlobTxPool() == nil {
+		return nil, nil
+	}
 	blobs, _, proofs, err := api.eth.BlobTxPool().GetBlobs(hashes, types.BlobSidecarVersion0, false)
 	if err != nil {
 		return nil, engine.InvalidParams.With(err)
@@ -549,6 +553,10 @@ func (api *ConsensusAPI) GetBlobsV2(hashes []common.Hash) ([]*engine.BlobAndProo
 	}
 	if len(hashes) > 128 {
 		return nil, engine.TooLargeRequest.With(fmt.Errorf("requested blob count too large: %v", len(hashes)))
+	}
+	// Running without a blob pool (as bolt does): unable to serve, so return null.
+	if api.eth.BlobTxPool() == nil {
+		return nil, nil
 	}
 	available := api.eth.BlobTxPool().AvailableBlobs(hashes)
 	getBlobsRequestedCounter.Inc(int64(len(hashes)))
