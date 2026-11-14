@@ -245,6 +245,21 @@ func (db *Database) repairHistory() error {
 	}
 	// Truncate the extra state histories above in freezer in case it's not
 	// aligned with the disk layer. It might happen after a unclean shutdown.
+	// Skip truncation in read-only mode since we can't modify the freezer.
+	if db.readOnly {
+		return nil
+	}
+	// Check if the journal state ID is ahead of the freezer head.
+	// This can happen when the journal was written but the freezer wasn't
+	// fully flushed. In this case, there's nothing to truncate.
+	freezerHead, err := db.stateFreezer.Ancients()
+	if err != nil {
+		return err
+	}
+	if id > freezerHead {
+		log.Info("Journal state ID ahead of freezer, skipping truncation", "journal", id, "freezer", freezerHead)
+		return nil
+	}
 	pruned, err := truncateFromHead(db.stateFreezer, typeStateHistory, id)
 	if err != nil {
 		log.Crit("Failed to truncate extra state histories", "err", err)
